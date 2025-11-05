@@ -1,0 +1,31 @@
+pathogen_name,vaccine_brand_name,single_or_combination,authority_name,vaccine_link,authority_link,manufacturer
+SARS-CoV-2 (COVID-19),Comirnaty,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/comirnaty,https://www.fda.gov,Pfizer Inc.
+SARS-CoV-2 (COVID-19),Spikevax,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/spikevax,https://www.fda.gov,Moderna Inc.
+SARS-CoV-2 (COVID-19),Vaxzevria,Single Pathogen Vaccine,EMA,https://www.ema.europa.eu/vaxzevria,https://www.ema.europa.eu,AstraZeneca
+SARS-CoV-2 (COVID-19),COVAXIN,Single Pathogen Vaccine,WHO (Prequalification),https://extranet.who.int/pqweb/vaccines/covaxin,https://www.who.int,Bharat Biotech
+SARS-CoV-2 (COVID-19),COVOVAX,Single Pathogen Vaccine,WHO (Prequalification),https://extranet.who.int/pqweb/vaccines/covovax,https://www.who.int,Serum Institute of India
+Influenza,FLUAD,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/fluad,https://www.fda.gov,Johnson & Johnson
+Influenza,Fluarix Quadrivalent,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/fluarix,https://www.fda.gov,GlaxoSmithKline (GSK)
+Hepatitis B,Engerix-B,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/engerix-b,https://www.fda.gov,GlaxoSmithKline (GSK)
+"Hepatitis A, Hepatitis B",Twinrix,Combination Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/twinrix,https://www.fda.gov,GlaxoSmithKline (GSK)
+Human Papillomavirus (HPV),Gardasil 9,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/gardasil-9,https://www.fda.gov,Merck & Co.
+Human Papillomavirus (HPV),Cervarix,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/cervarix,https://www.fda.gov,GlaxoSmithKline (GSK)
+"Measles, Mumps, Rubella",MMR II,Combination Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/mmr-ii,https://www.fda.gov,Merck & Co.
+"Measles, Mumps, Rubella, Varicella",ProQuad,Combination Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/proquad,https://www.fda.gov,Merck & Co.
+Varicella-Zoster (Chickenpox),Varivax,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/varivax,https://www.fda.gov,Merck & Co.
+Herpes Zoster (Shingles),Shingrix,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/shingrix,https://www.fda.gov,GlaxoSmithKline (GSK)
+Pneumococcal Disease,Prevnar 20,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/prevnar-20,https://www.fda.gov,Pfizer Inc.
+Pneumococcal Disease,Pneumovax 23,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/pneumovax-23,https://www.fda.gov,Merck & Co.
+Meningococcal Disease,Menactra,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/menactra,https://www.fda.gov,Sanofi
+Meningococcal Disease,Bexsero,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/bexsero,https://www.fda.gov,GlaxoSmithKline (GSK)
+"Diphtheria, Tetanus, Pertussis",Adacel,Combination Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/adacel,https://www.fda.gov,Sanofi
+"Diphtheria, Tetanus, Pertussis, Polio, Hib, Hepatitis B",Vaxelis,Combination Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/vaxelis,https://www.fda.gov,Merck & Co.
+Rotavirus,RotaTeq,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/rotateq,https://www.fda.gov,Merck & Co.
+Rotavirus,Rotavac,Single Pathogen Vaccine,WHO (Prequalification),https://extranet.who.int/pqweb/vaccines/rotavac,https://www.who.int,Bharat Biotech
+Yellow Fever,YF-VAX,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/yf-vax,https://www.fda.gov,Sanofi
+Rabies,RabAvert,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/rabavert,https://www.fda.gov,GlaxoSmithKline (GSK)
+Rabies,Rabipur,Single Pathogen Vaccine,EMA,https://www.ema.europa.eu/rabipur,https://www.ema.europa.eu,Bharat Biotech
+Typhoid Fever,Typhim Vi,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/typhim-vi,https://www.fda.gov,Sanofi
+Japanese Encephalitis,Ixiaro,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/ixiaro,https://www.fda.gov,Bharat Biotech
+Ebola Virus,Ervebo,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/ervebo,https://www.fda.gov,Merck & Co.
+Dengue Virus,Dengvaxia,Single Pathogen Vaccine,FDA,https://www.fda.gov/vaccines-blood-biologics/dengvaxia,https://www.fda.gov,Sanofi

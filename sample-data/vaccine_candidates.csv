@@ -1,0 +1,31 @@
+pathogen_name,vaccine_name,vaccine_link,phase_I,phase_II,phase_III,phase_IV,manufacturer
+Respiratory Syncytial Virus (RSV),mRNA-1345,https://clinicaltrials.gov/study/NCT05127434,false,false,true,false,Moderna Inc.
+Respiratory Syncytial Virus (RSV),RSVpreF,https://clinicaltrials.gov/study/NCT04424316,false,false,false,true,Pfizer Inc.
+Cytomegalovirus (CMV),mRNA-1647,https://clinicaltrials.gov/study/NCT05085366,false,false,true,false,Moderna Inc.
+HIV,mRNA-1644,https://clinicaltrials.gov/study/NCT05001373,true,false,false,false,Moderna Inc.
+HIV,PrEPVacc,https://clinicaltrials.gov/study/NCT04066881,false,true,false,false,Johnson & Johnson
+Malaria,R21/Matrix-M,https://clinicaltrials.gov/study/NCT04704830,false,false,true,false,AstraZeneca
+Malaria,RTS S/AS01,https://clinicaltrials.gov/study/NCT03276962,false,false,false,true,GlaxoSmithKline (GSK)
+Tuberculosis,M72/AS01E,https://clinicaltrials.gov/study/NCT01755598,false,true,false,false,GlaxoSmithKline (GSK)
+Tuberculosis,VPM1002,https://clinicaltrials.gov/study/NCT04351685,false,false,true,false,Serum Institute of India
+Zika Virus,mRNA-1893,https://clinicaltrials.gov/study/NCT04064905,true,false,false,false,Moderna Inc.
+Zika Virus,VRC-ZKADNA085-00-VP,https://clinicaltrials.gov/study/NCT02996461,false,true,false,false,Sanofi
+Dengue Virus,TAK-003,https://clinicaltrials.gov/study/NCT02747927,false,false,false,true,Sanofi
+Chikungunya Virus,VLA1553,https://clinicaltrials.gov/study/NCT04838444,false,false,true,false,Sanofi
+Chikungunya Virus,mRNA-1388,https://clinicaltrials.gov/study/NCT05456295,true,false,false,false,Moderna Inc.
+Norovirus,HIL-214,https://clinicaltrials.gov/study/NCT04563000,false,true,false,false,Sanofi
+Herpes Simplex Virus (HSV),GSK3943104A,https://clinicaltrials.gov/study/NCT04222985,false,true,false,false,GlaxoSmithKline (GSK)
+Group A Streptococcus,GAS-M,https://clinicaltrials.gov/study/NCT03877289,true,false,false,false,GlaxoSmithKline (GSK)
+Staphylococcus aureus,SA4Ag,https://clinicaltrials.gov/study/NCT03653637,false,false,true,false,Pfizer Inc.
+Clostridioides difficile,VLA84,https://clinicaltrials.gov/study/NCT04026009,false,true,false,false,Pfizer Inc.
+Epstein-Barr Virus (EBV),mRNA-1189,https://clinicaltrials.gov/study/NCT05164094,true,false,false,false,Moderna Inc.
+Nipah Virus,ChAdOx1 NipahB,https://clinicaltrials.gov/study/NCT04477941,true,false,false,false,AstraZeneca
+Lassa Fever,MV-LASV,https://clinicaltrials.gov/study/NCT04586140,true,false,false,false,Sanofi
+Marburg Virus,cAd3-Marburg,https://clinicaltrials.gov/study/NCT03475056,true,false,false,false,Johnson & Johnson
+Shigella,Shigella4V,https://clinicaltrials.gov/study/NCT03527173,false,true,false,false,GlaxoSmithKline (GSK)
+Enterotoxigenic E. coli (ETEC),ETVAX,https://clinicaltrials.gov/study/NCT02531802,false,true,false,false,Sanofi
+Streptococcus pneumoniae,PCV-20,https://clinicaltrials.gov/study/NCT03760146,false,false,false,true,Pfizer Inc.
+Neisseria meningitidis,MenABCWY,https://clinicaltrials.gov/study/NCT04502693,false,false,true,false,GlaxoSmithKline (GSK)
+Group B Streptococcus (GBS),GBS-NN,https://clinicaltrials.gov/study/NCT03765073,false,true,false,false,Merck & Co.
+Haemophilus influenzae,Hib-MenCY-TT,https://clinicaltrials.gov/study/NCT03691610,false,false,true,false,Sanofi
+Universal Influenza,FluMos-v1,https://clinicaltrials.gov/study/NCT04579250,true,false,false,false,Moderna Inc.

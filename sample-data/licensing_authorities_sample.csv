@@ -1,0 +1,16 @@
+country,authority_name,info,vaccine_brand_name,single_or_combination,pathogen_name,manufacturer,website
+United States,Food and Drug Administration,The FDA is responsible for protecting public health by ensuring the safety and efficacy of drugs and vaccines.,Comirnaty,Single,COVID-19,Pfizer,https://www.fda.gov/
+United States,Food and Drug Administration,The FDA is responsible for protecting public health by ensuring the safety and efficacy of drugs and vaccines.,Spikevax,Single,COVID-19,Moderna,https://www.fda.gov/
+European Union,European Medicines Agency,The EMA is responsible for the scientific evaluation of medicines in the European Union.,Vaxzevria,Single,COVID-19,AstraZeneca,https://www.ema.europa.eu/
+United Kingdom,Medicines and Healthcare products Regulatory Agency,MHRA regulates medicines and medical devices in the UK.,Vaxzevria,Single,COVID-19,AstraZeneca,https://www.gov.uk/mhra
+Japan,Pharmaceuticals and Medical Devices Agency,PMDA ensures the safety and efficacy of pharmaceuticals in Japan.,Comirnaty,Single,COVID-19,Pfizer,https://www.pmda.go.jp/
+Canada,Health Canada,Health Canada regulates the safety and effectiveness of health products.,Spikevax,Single,COVID-19,Moderna,https://www.canada.ca/health
+Australia,Therapeutic Goods Administration,TGA regulates therapeutic goods in Australia.,Comirnaty,Single,COVID-19,Pfizer,https://www.tga.gov.au/
+India,Central Drugs Standard Control Organisation,CDSCO regulates pharmaceuticals and medical devices in India.,Covishield,Single,COVID-19,Serum Institute,https://cdsco.gov.in/
+South Korea,Ministry of Food and Drug Safety,MFDS ensures the safety of food and drugs in South Korea.,Comirnaty,Single,COVID-19,Pfizer,https://www.mfds.go.kr/
+Brazil,National Health Surveillance Agency,ANVISA regulates health products and services in Brazil.,Comirnaty,Single,COVID-19,Pfizer,https://www.gov.br/anvisa/
+China,National Medical Products Administration,NMPA regulates pharmaceuticals and medical devices in China.,CoronaVac,Single,COVID-19,Sinovac,https://www.nmpa.gov.cn/
+Russia,Ministry of Health,Russian MOH oversees healthcare and pharmaceutical regulation.,Sputnik V,Single,COVID-19,Gamaleya,https://minzdrav.gov.ru/
+Switzerland,Swissmedic,Swissmedic ensures the safety and efficacy of therapeutic products.,Comirnaty,Single,COVID-19,Pfizer,https://www.swissmedic.ch/
+Singapore,Health Sciences Authority,HSA regulates health products in Singapore.,Comirnaty,Single,COVID-19,Pfizer,https://www.hsa.gov.sg/
+South Africa,South African Health Products Regulatory Authority,SAHPRA regulates medicines and medical devices.,Comirnaty,Single,COVID-19,Pfizer,https://www.sahpra.org.za/

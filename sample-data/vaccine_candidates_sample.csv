@@ -1,0 +1,17 @@
+pathogen_name,vaccine_name,vaccine_link,phase_i,phase_ii,phase_iii,phase_iv,manufacturer
+COVID-19,mRNA-1273.214,https://www.modernatx.com/covid19vaccine-eua/,Completed,Completed,Completed,Ongoing,Moderna
+Influenza,mRNA-1010,https://www.modernatx.com/pipeline,Completed,Completed,Phase III,Not Started,Moderna
+HIV,mRNA-1644,https://www.modernatx.com/pipeline,Completed,Phase II,Not Started,Not Started,Moderna
+Respiratory Syncytial Virus,mRNA-1345,https://www.modernatx.com/pipeline,Completed,Completed,Completed,Not Started,Moderna
+Cytomegalovirus,mRNA-1647,https://www.modernatx.com/pipeline,Completed,Completed,Phase III,Not Started,Moderna
+Zika Virus,mRNA-1893,https://www.modernatx.com/pipeline,Completed,Phase II,Not Started,Not Started,Moderna
+Epstein-Barr Virus,mRNA-1189,https://www.modernatx.com/pipeline,Completed,Phase I,Not Started,Not Started,Moderna
+Malaria,RTS-S/AS01,https://www.gsk.com/en-gb/products/malaria-vaccine/,Completed,Completed,Completed,Phase IV,GlaxoSmithKline
+Tuberculosis,M72/AS01E,https://www.gsk.com/en-gb/research/pipeline/,Completed,Completed,Phase IIb,Not Started,GlaxoSmithKline
+Dengue,TAK-003,https://www.takeda.com/newsroom/featured-topics/dengue/,Completed,Completed,Completed,Phase IV,Takeda
+Chikungunya,VLA1553,https://valneva.com/,Completed,Completed,Phase III,Not Started,Valneva
+Lyme Disease,VLA15,https://valneva.com/,Completed,Completed,Phase III,Not Started,Valneva
+Norovirus,bNAb,https://www.takeda.com/,Completed,Phase II,Not Started,Not Started,Takeda
+Japanese Encephalitis,JE-CV,https://www.biological-e.com/,Completed,Completed,Completed,Phase IV,Biological E
+Ebola,Ad26.ZEBOV/MVA-BN-Filo,https://www.janssen.com/,Completed,Completed,Completed,Phase IV,Janssen
+Marburg,rVSV-MARV,https://www.iavi.org/,Completed,Phase I,Not Started,Not Started,IAVI

@@ -1,0 +1,21 @@
+pathogen_name,vaccine_brand_name,single_or_combination,authority_name,vaccine_link,authority_link,manufacturer
+COVID-19,Comirnaty,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/comirnaty,https://www.fda.gov/,Pfizer
+COVID-19,Spikevax,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/spikevax,https://www.fda.gov/,Moderna
+COVID-19,Vaxzevria,Single,EMA,https://www.ema.europa.eu/vaxzevria,https://www.ema.europa.eu/,AstraZeneca
+Influenza,Fluzone Quadrivalent,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/fluzone,https://www.fda.gov/,Sanofi
+Influenza,FluMist Quadrivalent,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/flumist,https://www.fda.gov/,AstraZeneca
+Measles-Mumps-Rubella,MMR II,Combination,FDA,https://www.fda.gov/vaccines-blood-biologics/mmr,https://www.fda.gov/,Merck
+Hepatitis B,Engerix-B,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/engerix,https://www.fda.gov/,GlaxoSmithKline
+Pneumococcal,Prevnar 13,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/prevnar-13,https://www.fda.gov/,Pfizer
+Pneumococcal,Pneumovax 23,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/pneumovax,https://www.fda.gov/,Merck
+Shingles,Shingrix,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/shingrix,https://www.fda.gov/,GlaxoSmithKline
+Human Papillomavirus,Gardasil 9,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/gardasil,https://www.fda.gov/,Merck
+Meningococcal B,Bexsero,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/bexsero,https://www.fda.gov/,GlaxoSmithKline
+Meningococcal ACWY,Menactra,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/menactra,https://www.fda.gov/,Sanofi
+Rotavirus,RotaTeq,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/rotateq,https://www.fda.gov/,Merck
+Hepatitis A,Havrix,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/havrix,https://www.fda.gov/,GlaxoSmithKline
+Varicella,Varivax,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/varivax,https://www.fda.gov/,Merck
+Diphtheria-Tetanus-Pertussis,Infanrix,Combination,EMA,https://www.ema.europa.eu/infanrix,https://www.ema.europa.eu/,GlaxoSmithKline
+Polio,IPOL,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/ipol,https://www.fda.gov/,Sanofi
+Yellow Fever,YF-Vax,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/yf-vax,https://www.fda.gov/,Sanofi
+Rabies,Imovax Rabies,Single,FDA,https://www.fda.gov/vaccines-blood-biologics/imovax,https://www.fda.gov/,Sanofi
