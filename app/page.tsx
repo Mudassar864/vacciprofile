@@ -4,10 +4,10 @@ import { Syringe, FlaskConical, Factory, Award, Globe, GitCompare } from 'lucide
 export default function Home() {
   return (
     <div className="min-h-screen bg-orange-50">
-      <div className="bg-gradient-to-br from-orange-600 to-orange-700 text-white py-20">
+      <div className="bg-gradient-to-br from-orange-600 to-orange-700 text-white py-10">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl">
-            <p className="text-xl mb-4 text-orange-100">Welcome to</p>
+            <p className="text-xl mb-2 text-orange-100">Welcome to</p>
             <h1 className="text-6xl font-bold mb-6">VacciPROFILE</h1>
           </div>
         </div>

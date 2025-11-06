@@ -8,12 +8,12 @@ export function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Home' },
-    { href: '/vaccines', label: 'Licensed Vaccines' },
-    { href: '/candidates', label: 'Vaccine Candidates' },
-    { href: '/manufacturers', label: 'Manufacturers' },
-    { href: '/authorities', label: 'Licensing Authorities' },
-    { href: '/nitags', label: 'NITAGs' },
-    { href: '/compare', label: 'Compare' },
+    // { href: '/vaccines', label: 'Licensed Vaccines' },
+    // { href: '/candidates', label: 'Vaccine Candidates' },
+    // { href: '/manufacturers', label: 'Manufacturers' },
+    // { href: '/authorities', label: 'Licensing Authorities' },
+    // { href: '/nitags', label: 'NITAGs' },
+    // { href: '/compare', label: 'Compare' },
   ];
 
   return (
