@@ -25,35 +25,35 @@ export default function Home() {
           <NavigationCard
             title="Vaccine Candidates"
             description="Explore vaccines in development by pathogen and manufacturer"
-            href="/candidates"
+            href="#"
             icon={FlaskConical}
           />
 
           <NavigationCard
             title="Manufacturers"
             description="Company information, product portfolios, vaccines, and licenses"
-            href="/manufacturers"
+            href="#"
             icon={Factory}
           />
 
           <NavigationCard
             title="Licensing Authorities"
             description="Regulatory bodies, approved vaccines, and licensing information"
-            href="/authorities"
+            href="#"
             icon={Award}
           />
 
           <NavigationCard
             title="NITAGs"
             description="National Immunization Technical Advisory Groups recommendations"
-            href="/nitags"
+            href="#"
             icon={Globe}
           />
 
           <NavigationCard
             title="Comparison"
             description="Compare vaccines data and specifications based on pathogens"
-            href="/compare"
+            href="#"
             icon={GitCompare}
             variant="primary"
           />

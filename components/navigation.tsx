@@ -8,7 +8,7 @@ export function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Home' },
-    // { href: '/vaccines', label: 'Licensed Vaccines' },
+    { href: '/vaccines', label: 'Licensed Vaccines' },
     // { href: '/candidates', label: 'Vaccine Candidates' },
     // { href: '/manufacturers', label: 'Manufacturers' },
     // { href: '/authorities', label: 'Licensing Authorities' },
