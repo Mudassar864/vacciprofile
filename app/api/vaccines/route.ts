@@ -16,11 +16,13 @@ export async function GET() {
     },
   ];
 
-  return NextResponse.json(
-    { success: true, data: vaccines },
+  return new NextResponse(
+    JSON.stringify({ success: true, data: vaccines }),
     {
+      status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     }
   );
