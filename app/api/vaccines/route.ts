@@ -17,5 +17,5 @@ export async function GET() {
     },
   ];
 
-  return NextResponse.json({ vaccines });
+  return NextResponse.json({ success: true, data: vaccines });
 }
