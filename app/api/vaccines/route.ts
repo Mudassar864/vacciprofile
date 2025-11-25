@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  // Example data
   const vaccines = [
     {
       id: 1,
@@ -17,5 +16,12 @@ export async function GET() {
     },
   ];
 
-  return NextResponse.json({ success: true, data: vaccines });
+  return NextResponse.json(
+    { success: true, data: vaccines },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 }
