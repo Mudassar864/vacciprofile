@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { AlphabetNav } from '@/components/alphabet-nav';
+import { Search, ChevronDown } from 'lucide-react';
 
 interface Vaccine {
   licensed_vaccine_id: number;
@@ -16,6 +18,14 @@ interface Vaccine {
 
 export default function VaccinesPage() {
   const [vaccines, setVaccines] = useState<Vaccine[]>([]);
+  const [pathogens, setPathogens] = useState<string[]>([]);
+  const [selectedPathogen, setSelectedPathogen] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLetter, setActiveLetter] = useState('');
+  const [expandedSections, setExpandedSections] = useState({
+    licensedVaccines: true,
+    pathogenProfile: true
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,87 +41,175 @@ export default function VaccinesPage() {
 
     if (!error && data) {
       setVaccines(data as Vaccine[]);
+      const uniquePathogens = Array.from(new Set((data as Vaccine[]).map(v => v.pathogen_name))).sort();
+      setPathogens(uniquePathogens);
+      if (uniquePathogens.length > 0) {
+        setSelectedPathogen(uniquePathogens[0]);
+      }
     }
     setLoading(false);
   }
 
+  const filteredPathogens = pathogens.filter(pathogen => {
+    const matchesSearch = pathogen.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLetter = !activeLetter || pathogen.charAt(0).toUpperCase() === activeLetter;
+    return matchesSearch && matchesLetter;
+  });
+
+  const selectedVaccines = vaccines.filter(v => v.pathogen_name === selectedPathogen);
+
+  const toggleSection = (section: 'licensedVaccines' | 'pathogenProfile') => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   return (
-    <div className="min-h-screen bg-orange-50 p-6">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">All Licensed Vaccines</h1>
+    <div className="min-h-screen bg-orange-50">
+      <AlphabetNav onLetterClick={setActiveLetter} activeLetter={activeLetter} />
 
-      <div className="bg-white rounded shadow overflow-x-auto">
-        {loading ? (
-          <div className="p-6 text-center text-gray-500">Loading data...</div>
-        ) : (
-          <table className="min-w-full border-collapse">
-            <thead className="bg-gray-100 border-b border-gray-300">
-              <tr>
-                <th className="p-3 text-left font-semibold text-sm text-gray-700">Pathogen</th>
-                <th className="p-3 text-left font-semibold text-sm text-gray-700">Vaccine Brand</th>
-                <th className="p-3 text-left font-semibold text-sm text-gray-700">Type</th>
-                <th className="p-3 text-left font-semibold text-sm text-gray-700">Manufacturer</th>
-                <th className="p-3 text-left font-semibold text-sm text-gray-700">Licensing Authority</th>
-              </tr>
-            </thead>
+      <div className="flex">
+        <aside className="w-80 bg-white border-r border-gray-200 h-[calc(100vh-180px)] overflow-y-auto sticky top-0">
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search pathogens..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+            </div>
+          </div>
 
-            <tbody>
-              {vaccines.length > 0 ? (
-                vaccines.map(vaccine => (
-                  <tr
-                    key={vaccine.licensed_vaccine_id}
-                    className="border-b border-gray-200 hover:bg-orange-50 transition-colors"
-                  >
-                    <td className="p-3">{vaccine.pathogen_name}</td>
-
-                    <td className="p-3">
-                      {vaccine.vaccine_link ? (
-                        <a
-                          href={vaccine.vaccine_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {vaccine.vaccine_brand_name}
-                        </a>
-                      ) : (
-                        vaccine.vaccine_brand_name
-                      )}
-                    </td>
-
-                    <td className="p-3 text-gray-700">
-                      {vaccine.single_or_combination || 'Single Pathogen Vaccine'}
-                    </td>
-
-                    <td className="p-3 text-gray-700">
-                      {vaccine.manufacturer || 'Unknown'}
-                    </td>
-
-                    <td className="p-3">
-                      {vaccine.authority_link ? (
-                        <a
-                          href={vaccine.authority_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {vaccine.authority_name}
-                        </a>
-                      ) : (
-                        <span className="text-gray-700">{vaccine.authority_name || '-'}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">
-                    No vaccine data found.
-                  </td>
-                </tr>
+          {loading ? (
+            <div className="p-4 text-center text-gray-500">Loading pathogens...</div>
+          ) : (
+            <>
+              {filteredPathogens.map(pathogen => (
+                <button
+                  key={pathogen}
+                  onClick={() => setSelectedPathogen(pathogen)}
+                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-[#d17728] hover:text-white ${
+                    selectedPathogen === pathogen
+                      ? 'bg-[#d17728] text-white font-semibold'
+                      : 'text-black'
+                  }`}
+                >
+                  <span className={selectedPathogen === pathogen ? '' : 'italic'}>{pathogen}</span>
+                </button>
+              ))}
+              {filteredPathogens.length === 0 && (
+                <div className="p-4 text-center text-gray-500">No pathogens found</div>
               )}
-            </tbody>
-          </table>
-        )}
+            </>
+          )}
+        </aside>
+
+        <main className="flex-1 p-6">
+          <div className="max-w-full">
+            <div className="bg-gray-100 rounded-lg mb-4">
+              <button
+                onClick={() => toggleSection('licensedVaccines')}
+                className="w-full flex justify-between items-center px-6 py-3 text-left"
+              >
+                <span className="font-semibold text-gray-800">Licensed Vaccines</span>
+                <ChevronDown
+                  className={`text-gray-600 transition-transform ${expandedSections.licensedVaccines ? '' : 'rotate-180'}`}
+                  size={20}
+                />
+              </button>
+
+              {expandedSections.licensedVaccines && (
+                <div className="px-6 pb-4">
+                  <div className="bg-white rounded shadow overflow-hidden">
+                    <div className="grid grid-cols-4 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-semibold text-sm">
+                      <div>Vaccine Brand Name</div>
+                      <div>Type</div>
+                      <div>Manufacturer</div>
+                      <div>Licensing Authority</div>
+                    </div>
+                    {selectedVaccines.length > 0 ? (
+                      selectedVaccines.map(vaccine => (
+                        <div key={vaccine.licensed_vaccine_id} className="grid grid-cols-4 gap-4 p-4 border-b border-gray-100 hover:bg-orange-50 transition-colors">
+                          <div>
+                            {vaccine.vaccine_link ? (
+                              <a
+                                href={vaccine.vaccine_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {vaccine.vaccine_brand_name}
+                              </a>
+                            ) : (
+                              <span>{vaccine.vaccine_brand_name}</span>
+                            )}
+                          </div>
+                          <div className="text-gray-700">
+                            {vaccine.single_or_combination ? (
+                              <a href="#" className="text-blue-600 hover:underline">
+                                {vaccine.single_or_combination}
+                              </a>
+                            ) : (
+                              'Single Pathogen Vaccine'
+                            )}
+                          </div>
+                          <div className="text-gray-700">{vaccine.manufacturer || 'Unknown'}</div>
+                          <div>
+                            {vaccine.authority_link ? (
+                              <a
+                                href={vaccine.authority_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {vaccine.authority_name}
+                              </a>
+                            ) : (
+                              <span className="text-gray-700">{vaccine.authority_name || '-'}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center text-gray-500">
+                        No licensed vaccines found for this pathogen.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-gray-100 rounded-lg">
+              <button
+                onClick={() => toggleSection('pathogenProfile')}
+                className="w-full flex justify-between items-center px-6 py-3 text-left"
+              >
+                <span className="font-semibold text-gray-800">Pathogen Profile</span>
+                <ChevronDown
+                  className={`text-gray-600 transition-transform ${expandedSections.pathogenProfile ? '' : 'rotate-180'}`}
+                  size={20}
+                />
+              </button>
+
+              {expandedSections.pathogenProfile && (
+                <div className="px-6 pb-4">
+                  <div className="bg-white rounded shadow p-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-3">{selectedPathogen}</h3>
+                    <p className="text-gray-600">
+                      Detailed pathogen profile information will be displayed here, including epidemiology,
+                      transmission, symptoms, and prevention strategies.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
