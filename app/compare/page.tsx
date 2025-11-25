@@ -92,7 +92,7 @@ export default function ComparePage() {
                   onClick={() => setSelectedPathogen(pathogen)}
                   className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
                     selectedPathogen === pathogen
-                      ? 'bg-orange-500 text-white font-semibold'
+                      ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
                   }`}
                 >
@@ -109,7 +109,7 @@ export default function ComparePage() {
         <main className="flex-1 p-6">
           <div className="max-w-6xl">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-              <div className="bg-orange-500 text-white px-6 py-4">
+              <div className="bg-[#d17728] text-white px-6 py-4">
                 <h2 className="text-xl font-bold">Select Vaccines to Compare</h2>
                 <p className="text-sm text-orange-100 mt-1">
                   {selectedVaccines.length} vaccine{selectedVaccines.length !== 1 ? 's' : ''} selected
@@ -126,7 +126,7 @@ export default function ComparePage() {
                         type="checkbox"
                         checked={selectedVaccines.includes(vaccine.licensed_vaccine_id)}
                         onChange={() => toggleVaccineSelection(vaccine.licensed_vaccine_id)}
-                        className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                        className="w-5 h-5 text-[#d17728] border-gray-300 rounded focus:ring-orange-500"
                       />
                       <div>
                         <div className="font-semibold text-gray-900">{vaccine.vaccine_brand_name}</div>

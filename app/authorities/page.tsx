@@ -84,7 +84,7 @@ export default function AuthoritiesPage() {
                   onClick={() => setSelectedCountry(country)}
                   className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
                     selectedCountry === country
-                      ? 'bg-orange-500 text-white font-semibold'
+                      ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
                   }`}
                 >
@@ -103,7 +103,7 @@ export default function AuthoritiesPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-orange-500 text-white">
+                  <thead className="bg-[#d17728] text-white">
                     <tr>
                       <th className="px-6 py-4 text-left font-semibold">Authority Name</th>
                       <th className="px-6 py-4 text-left font-semibold">Vaccine Brand Name</th>
@@ -132,7 +132,7 @@ export default function AuthoritiesPage() {
                           </td>
                           <td className="px-6 py-4">
                             {authority.pathogen_name ? (
-                              <span className="text-orange-600 font-medium">{authority.pathogen_name}</span>
+                              <span className="text-[#d17728] font-medium">{authority.pathogen_name}</span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}

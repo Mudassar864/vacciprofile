@@ -24,7 +24,7 @@ export function NavigationCard({ title, description, href, icon: Icon, variant =
               ? 'bg-white border-white'
               : 'bg-white border-orange-500'
           }`}>
-            <Icon className={`w-12 h-12 ${variant === 'primary' ? 'text-orange-600' : 'text-orange-600'}`} />
+            <Icon className={`w-12 h-12 ${variant === 'primary' ? 'text-[#d17728]' : 'text-[#d17728]'}`} />
           </div>
           <CardTitle className={`text-2xl font-bold ${variant === 'primary' ? 'text-white' : 'text-gray-900'}`}>
             {title}
@@ -34,7 +34,7 @@ export function NavigationCard({ title, description, href, icon: Icon, variant =
           <CardDescription className={`text-base leading-relaxed ${variant === 'primary' ? 'text-white' : 'text-gray-600'}`}>
             {description}
           </CardDescription>
-          <p className={`mt-4 font-medium ${variant === 'primary' ? 'text-white' : 'text-orange-600'} group-hover:underline`}>
+          <p className={`mt-4 font-medium ${variant === 'primary' ? 'text-white' : 'text-[#d17728]'} group-hover:underline`}>
             View more
           </p>
         </CardContent>

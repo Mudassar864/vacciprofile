@@ -110,7 +110,7 @@ export default function CandidatesPage() {
                   onClick={() => setSelectedPathogen(pathogen)}
                   className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
                     selectedPathogen === pathogen
-                      ? 'bg-orange-500 text-white font-semibold'
+                      ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
                   }`}
                 >

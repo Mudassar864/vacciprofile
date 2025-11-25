@@ -168,7 +168,7 @@ export default async function ManufacturerDetailPage({ params }: { params: { id:
                               {vaccine.single_or_combination || 'Single'}
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-orange-600 font-medium">{vaccine.pathogen_name}</span>
+                              <span className="text-[#d17728] font-medium">{vaccine.pathogen_name}</span>
                             </td>
                             <td className="px-6 py-4 text-gray-700 text-sm">
                               {vaccine.authority_name || '-'}
@@ -203,7 +203,7 @@ export default async function ManufacturerDetailPage({ params }: { params: { id:
                               <span className="font-medium text-gray-900">{candidate.vaccine_name}</span>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-orange-600 font-medium">{candidate.pathogen_name}</span>
+                              <span className="text-[#d17728] font-medium">{candidate.pathogen_name}</span>
                             </td>
                           </tr>
                         ))}

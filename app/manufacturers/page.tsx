@@ -102,7 +102,7 @@ export default function ManufacturersPage() {
                     onClick={() => setSelectedLetter(group.letter === selectedLetter ? '' : group.letter)}
                     className={`w-full text-left px-4 py-2 border-b border-gray-200 font-semibold transition-colors ${
                       selectedLetter === group.letter
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-[#d17728] text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-orange-50'
                     }`}
                   >
@@ -114,7 +114,7 @@ export default function ManufacturersPage() {
                         <Link
                           key={manufacturer.manufacturer_id}
                           href={`/manufacturers/${manufacturer.manufacturer_id}`}
-                          className="block px-6 py-2 text-sm hover:bg-orange-100 transition-colors text-gray-700 hover:text-orange-600"
+                          className="block px-6 py-2 text-sm hover:bg-orange-100 transition-colors text-gray-700 hover:text-[#d17728]"
                         >
                           {manufacturer.name}
                         </Link>
@@ -133,7 +133,7 @@ export default function ManufacturersPage() {
         <main className="flex-1 p-6">
           <div className="max-w-6xl">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="bg-orange-500 text-white px-6 py-4">
+              <div className="bg-[#d17728] text-white px-6 py-4">
                 <h2 className="text-xl font-bold">Vaccine Manufacturers</h2>
                 <p className="text-sm text-orange-100 mt-1">
                   {filteredManufacturers.length} manufacturer{filteredManufacturers.length !== 1 ? 's' : ''} found
@@ -148,10 +148,10 @@ export default function ManufacturersPage() {
                       className="block px-6 py-4 hover:bg-orange-50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-gray-900 hover:text-orange-600">
+                        <h3 className="text-lg font-semibold text-gray-900 hover:text-[#d17728]">
                           {manufacturer.name}
                         </h3>
-                        <span className="text-orange-600">&rarr;</span>
+                        <span className="text-[#d17728]">&rarr;</span>
                       </div>
                       <div className="mt-2 space-y-1">
                         {manufacturer.headquarters && (

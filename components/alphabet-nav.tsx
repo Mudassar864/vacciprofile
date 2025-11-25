@@ -15,8 +15,8 @@ export function AlphabetNav({ onLetterClick, activeLetter }: AlphabetNavProps) {
           <button
             key={letter}
             onClick={() => onLetterClick?.(letter)}
-            className={`hover:text-orange-600 transition-colors ${
-              activeLetter === letter ? 'text-orange-600' : ''
+            className={`hover:text-[#d17728] transition-colors ${
+              activeLetter === letter ? 'text-[#d17728]' : ''
             }`}
           >
             {letter}

@@ -28,7 +28,7 @@ export function Navigation() {
               className={`py-3 px-4 font-semibold transition-colors ${
                 isActive
                   ? 'bg-orange-600 text-white'
-                  : 'text-gray-700 hover:text-orange-600'
+                  : 'text-gray-700 hover:text-[#d17728]'
               }`}
             >
               {item.label}

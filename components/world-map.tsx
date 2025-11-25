@@ -180,7 +180,7 @@ export function WorldMap({ nitags, onCountryClick }: WorldMapProps) {
             </h3>
 
             {hoveredNitag.nitag_name && (
-              <p className="text-sm font-semibold text-orange-600">
+              <p className="text-sm font-semibold text-[#d17728]">
                 {hoveredNitag.nitag_name}
               </p>
             )}
@@ -194,7 +194,7 @@ export function WorldMap({ nitags, onCountryClick }: WorldMapProps) {
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-[#d17728] rounded-full"></span>
                   Not Available
                 </span>
               )}
@@ -221,7 +221,7 @@ export function WorldMap({ nitags, onCountryClick }: WorldMapProps) {
             <span className="text-gray-600">NITAG Available</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+            <div className="w-3 h-3 rounded-full bg-[#d17728]"></div>
             <span className="text-gray-600">NITAG Not Available</span>
           </div>
           <div className="flex items-center gap-2">
