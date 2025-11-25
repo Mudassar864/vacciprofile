@@ -1,0 +1,21 @@
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  // Example data
+  const vaccines = [
+    {
+      id: 1,
+      name: "Pfizer-BioNTech",
+      pathogen: "COVID-19",
+      manufacturer: "Pfizer",
+    },
+    {
+      id: 2,
+      name: "Moderna",
+      pathogen: "COVID-19",
+      manufacturer: "Moderna",
+    },
+  ];
+
+  return NextResponse.json({ vaccines });
+}
