@@ -118,7 +118,7 @@ export default function ManufacturersPage() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/manufacturers');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/manufacturers`);
       console.log('Fetch response:', response);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

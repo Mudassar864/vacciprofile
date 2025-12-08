@@ -38,7 +38,7 @@ export default function AuthoritiesPage() {
   async function fetchData() {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/vaccines');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/vaccines`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

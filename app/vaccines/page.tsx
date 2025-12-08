@@ -102,7 +102,7 @@ export default function VaccinesPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/pathogens?populate=true"
+        `${process.env.NEXT_PUBLIC_API}/pathogens?populate=true`
       );
 
       if (!response.ok) {

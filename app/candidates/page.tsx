@@ -76,7 +76,7 @@ export default function CandidatesPage() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/candidate-vaccines');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/candidate-vaccines`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
