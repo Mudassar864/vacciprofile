@@ -90,7 +90,7 @@ export default function ComparePage() {
                 <button
                   key={pathogen}
                   onClick={() => setSelectedPathogen(pathogen)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
+                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover: transition-colors ${
                     selectedPathogen === pathogen
                       ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
@@ -120,7 +120,7 @@ export default function ComparePage() {
                   {pathogenVaccines.map(vaccine => (
                     <label
                       key={vaccine.licensed_vaccine_id}
-                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-orange-50 cursor-pointer transition-colors"
+                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover: cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"

@@ -60,7 +60,7 @@ export default function VaccinesPage() {
               vaccines.map((vaccine) => (
                 <tr
                   key={vaccine.licensed_vaccine_id}
-                  className="border-b border-gray-200 hover:bg-orange-50 transition-colors"
+                  className="border-b border-gray-200 hover: transition-colors"
                 >
                   <td className="p-3">{vaccine.pathogen_name}</td>
 

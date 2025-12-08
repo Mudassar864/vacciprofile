@@ -82,7 +82,7 @@ export default function NITAGsPage() {
                 <button
                   key={country}
                   onClick={() => setSelectedCountry(country)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
+                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover: transition-colors ${
                     selectedCountry === country
                       ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
@@ -106,7 +106,7 @@ export default function NITAGsPage() {
               </h1>
               <button
                 onClick={() => setShowMap(!showMap)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#d17728] text-white rounded-lg hover:bg-orange-600 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#d17728] text-white rounded-lg hover:bg-[#d17728] transition-colors"
               >
                 <Globe size={20} />
                 {showMap ? 'Hide Map' : 'Show Map'}

@@ -105,7 +105,7 @@ export function CrudTable({ tableName, data, columns, idField, onDataChange }: C
         <h3 className="text-lg font-semibold">Total Records: {data.length}</h3>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openAddDialog} className="bg-orange-600 hover:bg-orange-700">
+            <Button onClick={openAddDialog} className="bg-[#d17728] hover:bg-orange-700">
               <Plus className="w-4 h-4 mr-2" />
               Add New
             </Button>
@@ -150,7 +150,7 @@ export function CrudTable({ tableName, data, columns, idField, onDataChange }: C
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleAdd} disabled={loading} className="bg-orange-600 hover:bg-orange-700">
+                <Button onClick={handleAdd} disabled={loading} className="bg-[#d17728] hover:bg-orange-700">
                   {loading ? 'Adding...' : 'Add'}
                 </Button>
               </div>
@@ -246,7 +246,7 @@ export function CrudTable({ tableName, data, columns, idField, onDataChange }: C
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleEdit} disabled={loading} className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={handleEdit} disabled={loading} className="bg-[#d17728] hover:bg-orange-700">
                 {loading ? 'Updating...' : 'Update'}
               </Button>
             </div>

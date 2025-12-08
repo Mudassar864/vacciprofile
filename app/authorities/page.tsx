@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { Search } from 'lucide-react';
 
 interface Authority {
-  authority_id: number;
+  authority_id: string;
   country: string;
   authority_name: string;
   info: string;
@@ -25,26 +24,60 @@ export default function AuthoritiesPage() {
   const [activeLetter, setActiveLetter] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const authorityToCountry: { [key: string]: string } = {
+    'FDA': 'FDA (USA)',
+    'EMA': 'EMA (Europe; also see individual countries)',
+    'WHO': 'WHO',
+    // Add more mappings as needed for other authorities
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
 
   async function fetchData() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('licensing_authorities')
-      .select('*')
-      .order('country');
+    try {
+      const response = await fetch('http://localhost:5000/api/vaccines');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const apiData = await response.json();
+      const vaccines = Array.isArray(apiData) ? apiData : (apiData.vaccines || []);
 
-    if (!error && data) {
-      setAuthorities(data as Authority[]);
-      const uniqueCountries = Array.from(new Set((data as Authority[]).map(a => a.country).filter(Boolean))).sort();
+      const allAuthorities: Authority[] = [];
+      vaccines.forEach((vaccine: any) => {
+        vaccine.productProfiles?.forEach((profile: any) => {
+          const country = authorityToCountry[profile.type] || 'Other Countries';
+          const matchingLicense = vaccine.licensingDates?.find((ld: any) => ld.name === profile.type);
+          const manufacturerName = vaccine.manufacturerDetails?.[0]?.name || vaccine.manufacturers?.[0]?.name || '-';
+          const tempId = `${vaccine._id}-${profile.type}`;
+
+          allAuthorities.push({
+            authority_id: tempId,
+            country,
+            authority_name: profile.type,
+            info: profile.name || '',
+            vaccine_brand_name: vaccine.name,
+            single_or_combination: vaccine.vaccineType || '-',
+            pathogen_name: vaccine.pathogenId ? `Pathogen ID: ${vaccine.pathogenId.join(', ')}` : '-', // Placeholder; fetch pathogen names if available
+            manufacturer: manufacturerName,
+            website: matchingLicense?.source || '-'
+          });
+        });
+      });
+
+      setAuthorities(allAuthorities);
+      const uniqueCountries = Array.from(new Set(allAuthorities.map(a => a.country).filter(Boolean))).sort();
       setCountries(uniqueCountries);
       if (uniqueCountries.length > 0) {
         setSelectedCountry(uniqueCountries[0]);
       }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const filteredCountries = countries.filter(country => {
@@ -82,7 +115,7 @@ export default function AuthoritiesPage() {
                 <button
                   key={country}
                   onClick={() => setSelectedCountry(country)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-50 transition-colors ${
+                  className={`w-full text-left px-4 py-3 border-b border-gray-200 hover: transition-colors ${
                     selectedCountry === country
                       ? 'bg-[#d17728] text-white font-semibold'
                       : 'text-gray-700'
@@ -99,7 +132,7 @@ export default function AuthoritiesPage() {
         </aside>
 
         <main className="flex-1 p-6">
-          <div className="max-w-6xl">
+          <div className="max-w-full">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -116,7 +149,7 @@ export default function AuthoritiesPage() {
                   <tbody>
                     {selectedAuthorities.length > 0 ? (
                       selectedAuthorities.map((authority) => (
-                        <tr key={authority.authority_id} className="border-b border-gray-200 hover:bg-orange-50 transition-colors">
+                        <tr key={authority.authority_id} className="border-b border-gray-200 hover: transition-colors">
                           <td className="px-6 py-4 text-gray-900">
                             {authority.authority_name}
                           </td>
@@ -141,7 +174,7 @@ export default function AuthoritiesPage() {
                             {authority.manufacturer || '-'}
                           </td>
                           <td className="px-6 py-4">
-                            {authority.website ? (
+                            {authority.website && authority.website !== '-' ? (
                               <a
                                 href={authority.website}
                                 target="_blank"

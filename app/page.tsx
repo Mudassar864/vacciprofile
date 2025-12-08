@@ -4,7 +4,7 @@ import { Syringe, FlaskConical, Factory, Award, Globe, GitCompare } from 'lucide
 export default function Home() {
   return (
     <div className="min-h-screen bg-orange-50">
-      <div className="bg-gradient-to-br from-orange-600 to-orange-700 text-white py-10">
+      <div className="bg-[#d17728] text-white py-10">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl">
             <p className="text-xl mb-2 text-orange-100">Welcome to</p>
@@ -25,28 +25,28 @@ export default function Home() {
           <NavigationCard
             title="Vaccine Candidates"
             description="Explore vaccines in development by pathogen and manufacturer"
-            href="#"
+            href="candidates"
             icon={FlaskConical}
           />
 
           <NavigationCard
             title="Manufacturers"
             description="Company information, product portfolios, vaccines, and licenses"
-            href="#"
+            href="manufacturers"
             icon={Factory}
           />
 
           <NavigationCard
             title="Licensing Authorities"
             description="Regulatory bodies, approved vaccines, and licensing information"
-            href="#"
+            href="authorities"
             icon={Award}
           />
 
           <NavigationCard
             title="NITAGs"
             description="National Immunization Technical Advisory Groups recommendations"
-            href="#"
+            href="nitags"
             icon={Globe}
           />
 

@@ -15,7 +15,7 @@ export function NavigationCard({ title, description, href, icon: Icon, variant =
     <Link href={href} className="block group">
       <Card className={`h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
         variant === 'primary'
-          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-orange-600'
+          ? 'bg-[#d17728] text-white border-orange-600'
           : 'bg-white hover:border-orange-200'
       }`}>
         <CardHeader className="text-center">

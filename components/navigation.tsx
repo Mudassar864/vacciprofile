@@ -9,9 +9,9 @@ export function Navigation() {
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/vaccines', label: 'Licensed Vaccines' },
-    // { href: '/candidates', label: 'Vaccine Candidates' },
-    // { href: '/manufacturers', label: 'Manufacturers' },
-    // { href: '/authorities', label: 'Licensing Authorities' },
+    { href: '/candidates', label: 'Vaccine Candidates' },
+    { href: '/manufacturers', label: 'Manufacturers' },
+    { href: '/authorities', label: 'Licensing Authorities' },
     // { href: '/nitags', label: 'NITAGs' },
     // { href: '/compare', label: 'Compare' },
   ];
@@ -27,7 +27,7 @@ export function Navigation() {
               href={item.href}
               className={`py-3 px-4 font-semibold transition-colors ${
                 isActive
-                  ? 'bg-orange-600 text-white'
+                  ? 'bg-[#d17728] text-white'
                   : 'text-gray-700 hover:text-[#d17728]'
               }`}
             >

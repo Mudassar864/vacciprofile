@@ -180,7 +180,7 @@ export default function AdminPage() {
                   <AlertDescription>{message.text}</AlertDescription>
                 </Alert>
               )}
-              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={loading}>
+              <Button type="submit" className="w-full bg-[#d17728] hover:bg-orange-700" disabled={loading}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
@@ -230,7 +230,7 @@ export default function AdminPage() {
           <Button
             onClick={() => setActiveView('upload')}
             variant={activeView === 'upload' ? 'default' : 'outline'}
-            className={activeView === 'upload' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+            className={activeView === 'upload' ? 'bg-[#d17728] hover:bg-orange-700' : ''}
           >
             <Upload className="w-4 h-4 mr-2" />
             CSV Upload
@@ -238,7 +238,7 @@ export default function AdminPage() {
           <Button
             onClick={() => setActiveView('manage')}
             variant={activeView === 'manage' ? 'default' : 'outline'}
-            className={activeView === 'manage' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+            className={activeView === 'manage' ? 'bg-[#d17728] hover:bg-orange-700' : ''}
           >
             <Database className="w-4 h-4 mr-2" />
             Manage Data
@@ -490,7 +490,7 @@ function UploadSection({
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
       <p className="text-sm text-gray-600 mb-4">{description}</p>
       <Label htmlFor={`upload-${title}`} className="cursor-pointer">
-        <div className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+        <div className="inline-flex items-center px-4 py-2 bg-[#d17728] text-white rounded-lg hover:bg-orange-700 transition-colors">
           <Upload className="w-4 h-4 mr-2" />
           {uploading ? 'Uploading...' : 'Choose CSV File'}
         </div>
