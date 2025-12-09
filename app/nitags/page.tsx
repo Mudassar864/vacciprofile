@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { WorldMap } from '@/components/world-map';
 import { Search, CheckCircle, XCircle, Globe } from 'lucide-react';
@@ -31,18 +30,32 @@ export default function NITAGsPage() {
 
   async function fetchData() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('nitags')
-      .select('*')
-      .order('country');
-
-    if (!error && data) {
-      setNitags(data as NITAG[]);
-      const uniqueCountries = Array.from(new Set((data as NITAG[]).map(n => n.country))).sort();
-      setCountries(uniqueCountries);
-      if (uniqueCountries.length > 0) {
-        setSelectedCountry(uniqueCountries[0]);
+    const sampleData: NITAG[] = [
+      {
+        nitag_id: 1,
+        country: 'United States',
+        available: true,
+        website: 'https://www.cdc.gov/vaccines/',
+        url: 'https://www.cdc.gov',
+        nitag_name: 'ACIP',
+        established: '1964'
+      },
+      {
+        nitag_id: 2,
+        country: 'Canada',
+        available: true,
+        website: 'https://www.canada.ca/en/public-health.html',
+        url: 'https://www.canada.ca',
+        nitag_name: 'NACI',
+        established: '1964'
       }
+    ];
+
+    setNitags(sampleData);
+    const uniqueCountries = Array.from(new Set(sampleData.map(n => n.country))).sort();
+    setCountries(uniqueCountries);
+    if (uniqueCountries.length > 0) {
+      setSelectedCountry(uniqueCountries[0]);
     }
     setLoading(false);
   }

@@ -1,194 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, CheckCircle, XCircle, LogOut, Database } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Upload, CheckCircle, XCircle, Database } from 'lucide-react';
 import { CrudTable } from '@/components/admin/crud-table';
 
 export default function AdminPage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [activeView, setActiveView] = useState<'upload' | 'manage'>('upload');
-  const [tableData, setTableData] = useState<any>({
+  const [message] = useState<{ type: 'success' | 'error'; text: string } | null>({
+    type: 'success',
+    text: 'Supabase has been removed. Connect a new backend to re-enable uploads and management.'
+  });
+  const [uploading] = useState(false);
+  const [tableData] = useState<any>({
     manufacturers: [],
     licensed_vaccines: [],
     vaccine_candidates: [],
     licensing_authorities: [],
     nitags: []
   });
-  const router = useRouter();
-
-  useEffect(() => {
-    checkAndCreateAdmin();
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-        if (session?.user) {
-          fetchAllData();
-        }
-      })();
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  async function fetchAllData() {
-    const tables = ['manufacturers', 'licensed_vaccines', 'vaccine_candidates', 'licensing_authorities', 'nitags'];
-    const newData: any = {};
-
-    for (const table of tables) {
-      const { data } = await supabase.from(table).select('*').order('created_at', { ascending: false });
-      newData[table] = data || [];
-    }
-
-    setTableData(newData);
-  }
-
-  async function checkAndCreateAdmin() {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-    setLoading(false);
-
-    if (!user) {
-      setMessage({
-        type: 'success',
-        text: 'Default admin: admin@vacciprofile.com | Password: VacciProfile2025!'
-      });
-      setEmail('admin@vacciprofile.com');
-    }
-  }
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage(null);
-    setLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage({ type: 'error', text: error.message });
-    } else {
-      setMessage({ type: 'success', text: 'Logged in successfully!' });
-    }
-    setLoading(false);
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push('/');
-  }
-
-  async function handleCSVUpload(e: React.ChangeEvent<HTMLInputElement>, table: string) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    setMessage(null);
-
-    try {
-      const text = await file.text();
-      const rows = text.split('\n').map(row => row.split(','));
-      const headers = rows[0].map(h => h.trim());
-      const data = rows.slice(1).filter(row => row.length > 1 && row[0].trim());
-
-      const records = data.map(row => {
-        const record: any = {};
-        headers.forEach((header, index) => {
-          const value = row[index]?.trim();
-          if (value) {
-            record[header] = value;
-          }
-        });
-        return record;
-      });
-
-      const { error } = await supabase
-        .from(table as any)
-        .insert(records as any);
-
-      if (error) throw error;
-
-      setMessage({ type: 'success', text: `Successfully uploaded ${records.length} records to ${table}!` });
-      e.target.value = '';
-      fetchAllData();
-    } catch (error: any) {
-      setMessage({ type: 'error', text: `Error uploading CSV: ${error.message}` });
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">Admin Login</CardTitle>
-            <CardDescription>Sign in to access the admin panel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="admin@example.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                />
-              </div>
-              {message && (
-                <Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
-                  <AlertDescription>{message.text}</AlertDescription>
-                </Alert>
-              )}
-              <Button type="submit" className="w-full bg-[#d17728] hover:bg-orange-700" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const fetchAllData = () => {};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -199,14 +35,9 @@ export default function AdminPage() {
               <h1 className="text-3xl font-bold">Admin Panel</h1>
               <p className="text-white/90 mt-1">Upload and manage vaccine data</p>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="bg-white text-[#d17728] hover:bg-gray-100"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="text-sm text-white/90 bg-white/10 px-3 py-2 rounded">
+              Admin actions are read-only until a new backend is connected.
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +99,7 @@ export default function AdminPage() {
                 <UploadSection
                   title="Manufacturers"
                   description="Upload manufacturer data (name, website, headquarters, founded, ceo, revenue_operating_income_net_income, total_assets_total_equity, num_employees, history, licensed_vaccines, vaccine_candidates). All fields accept text values. Optional: licensed_vaccines and vaccine_candidates are comma-separated lists for display."
-                  onUpload={(e) => handleCSVUpload(e, 'manufacturers')}
+                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
                   uploading={uploading}
                 />
               </TabsContent>
@@ -277,7 +108,7 @@ export default function AdminPage() {
                 <UploadSection
                   title="Licensed Vaccines"
                   description="Upload vaccine data (pathogen_name, vaccine_brand_name, single_or_combination, authority_name, vaccine_link, authority_link, manufacturer). Use exact manufacturer names."
-                  onUpload={(e) => handleCSVUpload(e, 'licensed_vaccines')}
+                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
                   uploading={uploading}
                 />
               </TabsContent>
@@ -286,7 +117,7 @@ export default function AdminPage() {
                 <UploadSection
                   title="Vaccine Candidates"
                   description="Upload vaccine candidate data (pathogen_name, vaccine_name, vaccine_link, phase_i, phase_ii, phase_iii, phase_iv, manufacturer). Phase columns accept text values (e.g., 'Completed', 'In Progress', 'Phase I/II', etc.). Use exact manufacturer names."
-                  onUpload={(e) => handleCSVUpload(e, 'vaccine_candidates')}
+                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
                   uploading={uploading}
                 />
               </TabsContent>
@@ -295,7 +126,7 @@ export default function AdminPage() {
                 <UploadSection
                   title="Licensing Authorities"
                   description="Upload authority data (country, authority_name, info, vaccine_brand_name, single_or_combination, pathogen_name, manufacturer, website). This table stores both authority info and vaccine-authority relationships."
-                  onUpload={(e) => handleCSVUpload(e, 'licensing_authorities')}
+                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
                   uploading={uploading}
                 />
               </TabsContent>
@@ -304,7 +135,7 @@ export default function AdminPage() {
                 <UploadSection
                   title="NITAGs"
                   description="Upload NITAG data (country, available (true/false), website, url, nitag_name, established)"
-                  onUpload={(e) => handleCSVUpload(e, 'nitags')}
+                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
                   uploading={uploading}
                 />
               </TabsContent>
@@ -481,7 +312,7 @@ function UploadSection({
 }: {
   title: string;
   description: string;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUpload: () => void;
   uploading: boolean;
 }) {
   return (

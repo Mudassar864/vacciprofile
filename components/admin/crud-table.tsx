@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Pencil, Trash2, Plus } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 
 interface CrudTableProps {
   tableName: string;
@@ -27,65 +26,20 @@ export function CrudTable({ tableName, data, columns, idField, onDataChange }: C
 
   const handleAdd = async () => {
     setLoading(true);
-    try {
-      // @ts-ignore
-      const { error } = await supabase
-        .from(tableName)
-        .insert([formData]);
-
-      if (error) throw error;
-
-      setFormData({});
-      setIsAddDialogOpen(false);
-      onDataChange();
-    } catch (error: any) {
-      alert(`Error adding record: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+    alert('Data persistence is disabled (Supabase removed). Connect a new backend to enable saving.');
+    setLoading(false);
   };
 
   const handleEdit = async () => {
     setLoading(true);
-    try {
-      // @ts-ignore
-      const { error } = await supabase
-        .from(tableName)
-        .update(formData)
-        .eq(idField, editingItem[idField]);
-
-      if (error) throw error;
-
-      setEditingItem(null);
-      setFormData({});
-      setIsEditDialogOpen(false);
-      onDataChange();
-    } catch (error: any) {
-      alert(`Error updating record: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+    alert('Data persistence is disabled (Supabase removed). Connect a new backend to enable saving.');
+    setLoading(false);
   };
 
-  const handleDelete = async (id: any) => {
-    if (!confirm('Are you sure you want to delete this record?')) return;
-
+  const handleDelete = async (_id: any) => {
     setLoading(true);
-    try {
-      // @ts-ignore
-      const { error } = await supabase
-        .from(tableName)
-        .delete()
-        .eq(idField, id);
-
-      if (error) throw error;
-
-      onDataChange();
-    } catch (error: any) {
-      alert(`Error deleting record: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+    alert('Data persistence is disabled (Supabase removed). Connect a new backend to enable saving.');
+    setLoading(false);
   };
 
   const openAddDialog = () => {

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+
 interface Licenser {
   licenserId: number;
   acronym: string;
@@ -44,7 +46,7 @@ export default function AuthoritiesPage() {
   const [loading, setLoading] = useState(true);
   const [expandedProfile, setExpandedProfile] = useState(true);
   const [expandedTable, setExpandedTable] = useState(true);
-  const [showOtherCountries, setShowOtherCountries] = useState(true);
+  const [showOtherCountries, setShowOtherCountries] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -54,7 +56,7 @@ export default function AuthoritiesPage() {
     setLoading(true);
     try {
       // Fetch licensers
-      const licensersResponse = await fetch(`http://localhost:5000/api/licensers`);
+      const licensersResponse = await fetch(`${API_BASE}/licensers`);
       if (!licensersResponse.ok) {
         throw new Error(`HTTP error! status: ${licensersResponse.status}`);
       }
@@ -64,18 +66,42 @@ export default function AuthoritiesPage() {
       setLicensers(licensersList);
 
       // Fetch vaccines grouped by licenser
-      const vaccinesResponse = await fetch(`http://localhost:5000/api/vaccines-by-licenser`);
+      const vaccinesResponse = await fetch(`${API_BASE}/vaccines/by-licenser`);
       if (!vaccinesResponse.ok) {
         throw new Error(`HTTP error! status: ${vaccinesResponse.status}`);
       }
       const vaccinesData = await vaccinesResponse.json();
-      const vaccinesByLicenserData: LicenserWithVaccines[] = vaccinesData.data || [];
+      const vaccinesByLicenserData: any[] = vaccinesData.data || [];
 
       // Create a map of licenser acronym to vaccines
       const vaccinesMap: { [key: string]: Vaccine[] } = {};
-      vaccinesByLicenserData.forEach((item) => {
-        if (item.licenser && item.vaccines) {
-          vaccinesMap[item.licenser.acronym] = item.vaccines;
+      vaccinesByLicenserData.forEach((item, idx) => {
+        const licenserKey =
+          item.licenserName ||
+          item.licenser?.acronym ||
+          item.licenser?.fullName ||
+          `Licenser-${idx + 1}`;
+
+        const vaccines = (item.vaccines || []).map((v: any, vIdx: number) => ({
+          vaccineId: v.vaccineId ?? v.id ?? vIdx,
+          vaccineBrandName: v.name || v.vaccineBrandName || 'Unknown Vaccine',
+          vaccineType: (v.type || v.vaccineType || 'single')
+            .toString()
+            .toLowerCase()
+            .includes('combination')
+            ? 'combination'
+            : 'single',
+          pathogens: Array.isArray(v.pathogens)
+            ? v.pathogens.map((p: any) => p?.name || p)?.filter(Boolean)
+            : [],
+          manufacturers: Array.isArray(v.manufacturers)
+            ? v.manufacturers.map((m: any) => m?.name || m)?.filter(Boolean)
+            : []
+        }));
+
+        vaccinesMap[licenserKey] = vaccines;
+        if (item.licenser?.acronym && item.licenser?.acronym !== licenserKey) {
+          vaccinesMap[item.licenser.acronym] = vaccines;
         }
       });
 

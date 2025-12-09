@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { Search } from 'lucide-react';
 
@@ -29,20 +28,29 @@ export default function ComparePage() {
 
   async function fetchData() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('licensed_vaccines')
-      .select('*')
-      .order('pathogen_name');
-
-    if (!error && data) {
-      setVaccines(data as Vaccine[]);
-      const uniquePathogens = Array.from(new Set((data as Vaccine[]).map(v => v.pathogen_name))).sort();
+    try {
+      const res = await fetch('/vaccines.json');
+      const json = await res.json();
+      const mapped: Vaccine[] = (json.data || []).map((item: any, idx: number) => ({
+        licensed_vaccine_id: item.id ?? idx,
+        pathogen_name: item.pathogen || 'Unknown',
+        vaccine_brand_name: item.name || 'Unknown Vaccine',
+        single_or_combination: item.single_or_combination || 'Single Pathogen Vaccine',
+        authority_name: item.authority || '-',
+        manufacturer: item.manufacturer || 'Unknown'
+      }));
+      setVaccines(mapped);
+      const uniquePathogens = Array.from(new Set(mapped.map(v => v.pathogen_name))).sort();
       setPathogens(uniquePathogens);
       if (uniquePathogens.length > 0) {
         setSelectedPathogen(uniquePathogens[0]);
       }
+    } catch (err) {
+      setVaccines([]);
+      setPathogens([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const filteredPathogens = pathogens.filter(pathogen => {

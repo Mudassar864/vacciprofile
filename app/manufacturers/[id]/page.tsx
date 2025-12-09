@@ -1,4 +1,3 @@
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { notFound } from 'next/navigation';
@@ -7,33 +6,22 @@ import { ExternalLink } from 'lucide-react';
 export const revalidate = 0;
 
 async function getManufacturer(id: string) {
-  const { data: manufacturer, error } = await supabase
-    .from('manufacturers')
-    .select('*')
-    .eq('manufacturer_id', id)
-    .maybeSingle();
-
-  if (error || !manufacturer) {
-    return null;
-  }
-
-  const manufacturerName = (manufacturer as any).name;
-
-  const { data: licensedVaccines } = await supabase
-    .from('licensed_vaccines')
-    .select('*')
-    .eq('manufacturer', manufacturerName);
-
-  const { data: vaccineCandidates } = await supabase
-    .from('vaccine_candidates')
-    .select('*')
-    .eq('manufacturer', manufacturerName);
-
-  return {
-    ...(manufacturer as any),
-    licensed_vaccines: licensedVaccines || [],
-    vaccine_candidates: vaccineCandidates || []
+  const sample = {
+    manufacturer_id: id,
+    name: 'Manufacturer data unavailable',
+    headquarters: 'N/A',
+    founded: 'N/A',
+    ceo: 'N/A',
+    website: '',
+    revenue_operating_income_net_income: '',
+    total_assets_total_equity: '',
+    num_employees: '',
+    history: 'Supabase has been removed from the project; connect a new data source to display manufacturer details.',
+    licensed_vaccines: [],
+    vaccine_candidates: []
   };
+
+  return sample;
 }
 
 export default async function ManufacturerDetailPage({ params }: { params: { id: string } }) {
