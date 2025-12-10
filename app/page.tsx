@@ -4,17 +4,17 @@ import { Syringe, FlaskConical, Factory, Award, Globe, GitCompare } from 'lucide
 export default function Home() {
   return (
     <div className="min-h-screen bg-orange-50">
-      <div className="bg-[#d17728] text-white py-10">
-        <div className="container mx-auto px-6">
+      <div className="bg-[#d17728] text-white py-6 sm:py-8 md:py-10">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl">
-            <p className="text-xl mb-2 text-orange-100">Welcome to</p>
-            <h1 className="text-6xl font-bold mb-6">VacciPROFILE</h1>
+            <p className="text-base sm:text-lg md:text-xl mb-2 text-orange-100">Welcome to</p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">VacciPROFILE</h1>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
           <NavigationCard
             title="Licensed Vaccines"
             description="Browse vaccines by pathogen, brandname, licenses, single and combination vaccines"
@@ -45,7 +45,7 @@ export default function Home() {
 
           <NavigationCard
             title="NITAGs"
-            description="National Immunization Technical Advisory Groups recommendations"
+            description="National Immunization Technical Advisory Groups by country"
             href="nitags"
             icon={Globe}
           />

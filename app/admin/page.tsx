@@ -21,28 +21,27 @@ export default function AdminPage() {
     manufacturers: [],
     licensed_vaccines: [],
     vaccine_candidates: [],
-    licensing_authorities: [],
-    nitags: []
+    licensing_authorities: []
   });
   const fetchAllData = () => {};
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
+      <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white py-6 sm:py-8">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Admin Panel</h1>
-              <p className="text-white/90 mt-1">Upload and manage vaccine data</p>
+              <h1 className="text-2xl sm:text-3xl font-bold">Admin Panel</h1>
+              <p className="text-white/90 mt-1 text-sm sm:text-base">Upload and manage vaccine data</p>
             </div>
-            <div className="text-sm text-white/90 bg-white/10 px-3 py-2 rounded">
+            <div className="text-xs sm:text-sm text-white/90 bg-white/10 px-3 py-2 rounded w-full sm:w-auto">
               Admin actions are read-only until a new backend is connected.
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {message && (
           <Alert
             variant={message.type === 'error' ? 'destructive' : 'default'}
@@ -57,11 +56,11 @@ export default function AdminPage() {
           </Alert>
         )}
 
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
           <Button
             onClick={() => setActiveView('upload')}
             variant={activeView === 'upload' ? 'default' : 'outline'}
-            className={activeView === 'upload' ? 'bg-[#d17728] hover:bg-orange-700' : ''}
+            className={`w-full sm:w-auto ${activeView === 'upload' ? 'bg-[#d17728] hover:bg-orange-700' : ''}`}
           >
             <Upload className="w-4 h-4 mr-2" />
             CSV Upload
@@ -69,7 +68,7 @@ export default function AdminPage() {
           <Button
             onClick={() => setActiveView('manage')}
             variant={activeView === 'manage' ? 'default' : 'outline'}
-            className={activeView === 'manage' ? 'bg-[#d17728] hover:bg-orange-700' : ''}
+            className={`w-full sm:w-auto ${activeView === 'manage' ? 'bg-[#d17728] hover:bg-orange-700' : ''}`}
           >
             <Database className="w-4 h-4 mr-2" />
             Manage Data
@@ -87,12 +86,11 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="manufacturers" className="w-full">
-              <TabsList className="grid grid-cols-2 lg:grid-cols-4 mb-6">
-                <TabsTrigger value="manufacturers">Manufacturers</TabsTrigger>
-                <TabsTrigger value="vaccines">Licensed Vaccines</TabsTrigger>
-                <TabsTrigger value="candidates">Candidates</TabsTrigger>
-                <TabsTrigger value="authorities">Authorities</TabsTrigger>
-                <TabsTrigger value="nitags">NITAGs</TabsTrigger>
+              <TabsList className="grid grid-cols-2 lg:grid-cols-4 mb-4 sm:mb-6 gap-1 sm:gap-2">
+                <TabsTrigger value="manufacturers" className="text-xs sm:text-sm">Manufacturers</TabsTrigger>
+                <TabsTrigger value="vaccines" className="text-xs sm:text-sm">Licensed Vaccines</TabsTrigger>
+                <TabsTrigger value="candidates" className="text-xs sm:text-sm">Candidates</TabsTrigger>
+                <TabsTrigger value="authorities" className="text-xs sm:text-sm">Authorities</TabsTrigger>
               </TabsList>
 
               <TabsContent value="manufacturers">
@@ -130,15 +128,6 @@ export default function AdminPage() {
                   uploading={uploading}
                 />
               </TabsContent>
-
-              <TabsContent value="nitags">
-                <UploadSection
-                  title="NITAGs"
-                  description="Upload NITAG data (country, available (true/false), website, url, nitag_name, established)"
-                  onUpload={() => alert('Uploads are disabled until a new backend is configured.')}
-                  uploading={uploading}
-                />
-              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
@@ -163,12 +152,11 @@ export default function AdminPage() {
 
         {activeView === 'manage' && (
           <Tabs defaultValue="manufacturers" className="w-full">
-            <TabsList className="grid grid-cols-2 lg:grid-cols-5 mb-6">
-              <TabsTrigger value="manufacturers">Manufacturers</TabsTrigger>
-              <TabsTrigger value="vaccines">Licensed Vaccines</TabsTrigger>
-              <TabsTrigger value="candidates">Candidates</TabsTrigger>
-              <TabsTrigger value="authorities">Authorities</TabsTrigger>
-              <TabsTrigger value="nitags">NITAGs</TabsTrigger>
+            <TabsList className="grid grid-cols-2 lg:grid-cols-4 mb-4 sm:mb-6 gap-1 sm:gap-2">
+              <TabsTrigger value="manufacturers" className="text-xs sm:text-sm">Manufacturers</TabsTrigger>
+              <TabsTrigger value="vaccines" className="text-xs sm:text-sm">Licensed Vaccines</TabsTrigger>
+              <TabsTrigger value="candidates" className="text-xs sm:text-sm">Candidates</TabsTrigger>
+              <TabsTrigger value="authorities" className="text-xs sm:text-sm">Authorities</TabsTrigger>
             </TabsList>
 
             <TabsContent value="manufacturers">
@@ -272,31 +260,6 @@ export default function AdminPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-
-            <TabsContent value="nitags">
-              <Card>
-                <CardHeader>
-                  <CardTitle>NITAGs</CardTitle>
-                  <CardDescription>Add, edit, or delete NITAG records</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CrudTable
-                    tableName="nitags"
-                    data={tableData.nitags}
-                    columns={[
-                      { key: 'country', label: 'Country' },
-                      { key: 'nitag_name', label: 'NITAG Name' },
-                      { key: 'available', label: 'Available', type: 'boolean' },
-                      { key: 'established', label: 'Established' },
-                      { key: 'website', label: 'Website' },
-                      { key: 'url', label: 'URL' }
-                    ]}
-                    idField="nitag_id"
-                    onDataChange={fetchAllData}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         )}
       </div>
@@ -316,12 +279,12 @@ function UploadSection({
   uploading: boolean;
 }) {
   return (
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600 mb-4">{description}</p>
+    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 md:p-8 text-center">
+      <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-xs sm:text-sm text-gray-600 mb-4">{description}</p>
       <Label htmlFor={`upload-${title}`} className="cursor-pointer">
-        <div className="inline-flex items-center px-4 py-2 bg-[#d17728] text-white rounded-lg hover:bg-orange-700 transition-colors">
+        <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-[#d17728] text-white rounded-lg hover:bg-orange-700 transition-colors text-sm sm:text-base">
           <Upload className="w-4 h-4 mr-2" />
           {uploading ? 'Uploading...' : 'Choose CSV File'}
         </div>
