@@ -38,10 +38,13 @@ export default async function NITAGsPage({
 }) {
   const nitags = await fetchNITAGs();
   
-  const initialSelectedCountry = 
-    searchParams.country && nitags.find(n => n.country === decodeURIComponent(searchParams.country))
-      ? decodeURIComponent(searchParams.country)
-      : undefined;
+  let initialSelectedCountry: string | undefined = undefined;
+  if (searchParams.country) {
+    const decodedCountry = decodeURIComponent(searchParams.country);
+    if (nitags.find(n => n.country === decodedCountry)) {
+      initialSelectedCountry = decodedCountry;
+    }
+  }
 
   return (
     <NITAGsClient
