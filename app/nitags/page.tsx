@@ -1,5 +1,7 @@
 import { NITAGsClient, NITAG } from './nitags-client';
 
+export const dynamic = 'force-dynamic';
+
 async function fetchNITAGs(): Promise<NITAG[]> {
   try {
     const response = await fetch(

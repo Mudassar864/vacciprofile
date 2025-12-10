@@ -1,5 +1,7 @@
 import { VaccinesClient } from './vaccines-client';
 
+export const dynamic = 'force-dynamic';
+
 interface Vaccine {
   licensed_vaccine_id: string;
   pathogen_name: string;
@@ -129,10 +131,13 @@ export default async function VaccinesPage({
 }) {
   const { vaccines, pathogensData, pathogens } = await fetchPathogensData();
   
-  const initialSelectedPathogen = 
-    searchParams.pathogen && pathogens.includes(decodeURIComponent(searchParams.pathogen))
-      ? decodeURIComponent(searchParams.pathogen)
-      : pathogens[0] || "";
+  let initialSelectedPathogen: string = pathogens[0] || "";
+  if (searchParams.pathogen) {
+    const decodedPathogen = decodeURIComponent(searchParams.pathogen);
+    if (pathogens.includes(decodedPathogen)) {
+      initialSelectedPathogen = decodedPathogen;
+    }
+  }
 
   return (
     <VaccinesClient

@@ -1,5 +1,7 @@
 import { ManufacturersClient, Manufacturer } from './manufacturers-client';
 
+export const dynamic = 'force-dynamic';
+
 async function fetchManufacturers(): Promise<Manufacturer[]> {
   const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
   
@@ -34,10 +36,13 @@ export default async function ManufacturersPage({
 }) {
   const manufacturers = await fetchManufacturers();
   
-  const initialSelectedManufacturerId = 
-    searchParams.manufacturer && manufacturers.find(m => m._id === searchParams.manufacturer)
-      ? searchParams.manufacturer
-      : undefined;
+  let initialSelectedManufacturerId: string | undefined = undefined;
+  if (searchParams.manufacturer) {
+    const found = manufacturers.find(m => m._id === searchParams.manufacturer);
+    if (found) {
+      initialSelectedManufacturerId = searchParams.manufacturer;
+    }
+  }
 
   return (
     <ManufacturersClient

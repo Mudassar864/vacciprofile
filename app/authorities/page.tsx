@@ -1,5 +1,7 @@
 import { AuthoritiesClient, Licenser, Vaccine } from './authorities-client';
 
+export const dynamic = 'force-dynamic';
+
 const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
 
 async function fetchAuthoritiesData() {

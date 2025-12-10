@@ -1,5 +1,7 @@
 import { CandidatesClient } from './candidates-client';
 
+export const dynamic = 'force-dynamic';
+
 interface Candidate {
   _id: string;
   pathogenName: string;
@@ -58,10 +60,13 @@ export default async function CandidatesPage({
 }) {
   const { candidates, pathogens } = await fetchCandidates();
   
-  const initialSelectedPathogen = 
-    searchParams.pathogen && pathogens.includes(decodeURIComponent(searchParams.pathogen))
-      ? decodeURIComponent(searchParams.pathogen)
-      : pathogens[0] || "";
+  let initialSelectedPathogen: string = pathogens[0] || "";
+  if (searchParams.pathogen) {
+    const decodedPathogen = decodeURIComponent(searchParams.pathogen);
+    if (pathogens.includes(decodedPathogen)) {
+      initialSelectedPathogen = decodedPathogen;
+    }
+  }
 
   return (
     <CandidatesClient
