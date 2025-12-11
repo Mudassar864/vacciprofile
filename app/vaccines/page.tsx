@@ -2,24 +2,43 @@ import { VaccinesClient } from './vaccines-client';
 
 export const dynamic = 'force-dynamic';
 
+interface ProductProfile {
+  type: string;
+  name: string;
+  composition: string;
+  strainCoverage: string;
+  indication: string;
+  contraindication: string;
+  dosing: string;
+  immunogenicity: string;
+  Efficacy: string;
+  durationOfProtection: string;
+  coAdministration: string;
+  reactogenicity: string;
+  safety: string;
+  vaccinationGoal: string;
+  others: string;
+}
+
 interface Vaccine {
   licensed_vaccine_id: string;
-  pathogen_name: string;
-  vaccine_brand_name: string;
+  pathogen_name?: string;
+  vaccine_brand_name?: string;
   single_or_combination: string;
   authority_names: string[];
   authority_links: string[];
-  vaccine_link: string;
-  manufacturer: string;
+  vaccine_link?: string;
+  manufacturer?: string;
+  productProfiles?: ProductProfile[];
 }
 
 interface PathogenData {
-  pathogenId: number;
-  name: string;
-  description: string;
-  image: string;
-  bulletpoints: string;
-  link: string;
+  pathogenId?: number;
+  name?: string;
+  description?: string;
+  image?: string;
+  bulletpoints?: string;
+  link?: string;
 }
 
 async function fetchPathogensData() {
@@ -48,16 +67,18 @@ async function fetchPathogensData() {
     const pathogenNames: string[] = [];
 
     data.forEach((pathogen: any) => {
-      const pathogenName = pathogen.name || "Unknown Pathogen";
-      pathogenNames.push(pathogenName);
+      const pathogenName = pathogen.name;
+      if (pathogenName) {
+        pathogenNames.push(pathogenName);
+      }
 
       transformedPathogens.push({
-        pathogenId: pathogen.pathogenId || 0,
-        name: pathogenName,
-        description: pathogen.description || "",
-        image: pathogen.image || "",
-        bulletpoints: pathogen.bulletpoints || "",
-        link: pathogen.link || "",
+        pathogenId: pathogen.pathogenId,
+        name: pathogen.name,
+        description: pathogen.description,
+        image: pathogen.image,
+        bulletpoints: pathogen.bulletpoints,
+        link: pathogen.link,
       });
 
       const vaccinesArray = Array.isArray(pathogen.vaccines)
@@ -74,35 +95,37 @@ async function fetchPathogensData() {
 
         licensingDates.forEach((licensing: any) => {
           if (licensing.name) {
-            authorityNames.push(licensing.name.trim());
+            authorityNames.push(licensing.name);
           }
           if (licensing.source) {
-            authorityLinks.push(licensing.source.trim());
+            authorityLinks.push(licensing.source);
           }
         });
 
-        if (authorityNames.length > 0) {
-          transformedVaccines.push({
-            licensed_vaccine_id: `${pathogen.pathogenId || 0}-${vIndex}`,
-            pathogen_name: pathogenName,
-            vaccine_brand_name: vaccine.name || "Unknown Vaccine",
-            single_or_combination:
-              vaccine.single_or_combination || "Single Pathogen Vaccine",
-            authority_names: authorityNames,
-            authority_links: authorityLinks,
-            vaccine_link: vaccine.vaccineLink || pathogen.link || "",
-            manufacturer:
-              vaccine.manufacturer || vaccine.manufacturer_name || "Unknown",
-          });
-        }
+        transformedVaccines.push({
+          licensed_vaccine_id: `${pathogen.pathogenId}-${vIndex}`,
+          pathogen_name: pathogenName,
+          vaccine_brand_name: vaccine.name,
+          single_or_combination: vaccine.vaccineType === "single" ? "Single Pathogen Vaccine" : "Combination Vaccine",
+          authority_names: authorityNames,
+          authority_links: authorityLinks,
+          vaccine_link: vaccine.vaccineLink,
+          manufacturer: vaccine.manufacturer,
+          productProfiles: vaccine.productProfiles,
+        });
       });
     });
 
     transformedVaccines.sort((a, b) => {
-      if (a.pathogen_name === b.pathogen_name) {
-        return a.vaccine_brand_name.localeCompare(b.vaccine_brand_name);
+      const aPathogen = a.pathogen_name || "";
+      const bPathogen = b.pathogen_name || "";
+      const aVaccine = a.vaccine_brand_name || "";
+      const bVaccine = b.vaccine_brand_name || "";
+      
+      if (aPathogen === bPathogen) {
+        return aVaccine.localeCompare(bVaccine);
       }
-      return a.pathogen_name.localeCompare(b.pathogen_name);
+      return aPathogen.localeCompare(bPathogen);
     });
 
     const uniquePathogenNames = Array.from(new Set(pathogenNames)).sort(

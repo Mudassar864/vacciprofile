@@ -4,25 +4,50 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, Menu, X } from "lucide-react";
 import { AlphabetNav } from "@/components/alphabet-nav";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+interface ProductProfile {
+  type: string;
+  name: string;
+  composition: string;
+  strainCoverage: string;
+  indication: string;
+  contraindication: string;
+  dosing: string;
+  immunogenicity: string;
+  Efficacy: string;
+  durationOfProtection: string;
+  coAdministration: string;
+  reactogenicity: string;
+  safety: string;
+  vaccinationGoal: string;
+  others: string;
+}
 
 interface Vaccine {
   licensed_vaccine_id: string;
-  pathogen_name: string;
-  vaccine_brand_name: string;
+  pathogen_name?: string;
+  vaccine_brand_name?: string;
   single_or_combination: string;
   authority_names: string[];
   authority_links: string[];
-  vaccine_link: string;
-  manufacturer: string;
+  vaccine_link?: string;
+  manufacturer?: string;
+  productProfiles?: ProductProfile[];
 }
 
 interface PathogenData {
-  pathogenId: number;
-  name: string;
-  description: string;
-  image: string;
-  bulletpoints: string;
-  link: string;
+  pathogenId?: number;
+  name?: string;
+  description?: string;
+  image?: string;
+  bulletpoints?: string;
+  link?: string;
 }
 
 interface VaccinesClientProps {
@@ -53,6 +78,7 @@ export function VaccinesClient({
     pathogenProfile: true,
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
 
   useEffect(() => {
     const pathogenParam = searchParams.get("pathogen");
@@ -72,7 +98,7 @@ export function VaccinesClient({
   });
 
   const selectedVaccines = vaccines.filter(
-    (v) => v.pathogen_name === selectedPathogen
+    (v) => (v.pathogen_name || "") === selectedPathogen
   );
 
   const selectedPathogenData = pathogensData.find(
@@ -219,18 +245,15 @@ export function VaccinesClient({
                           {/* Desktop layout */}
                           <div className="hidden md:grid md:grid-cols-3 gap-4 p-4">
                             <div>
-                              {vaccine.vaccine_link ? (
-                                <a
-                                  href={vaccine.vaccine_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  {vaccine.vaccine_brand_name}
-                                </a>
-                              ) : (
-                                <span>{vaccine.vaccine_brand_name}</span>
-                              )}
+                              <button
+                                onClick={() => {
+                                  setSelectedVaccine(vaccine);
+                                  console.log(vaccine);
+                                }}
+                                className="text-blue-600 hover:underline text-left font-medium cursor-pointer"
+                              >
+                                {vaccine.vaccine_brand_name || ""}
+                              </button>
                             </div>
 
                             <div className="text-gray-700">
@@ -269,18 +292,14 @@ export function VaccinesClient({
                             <div>
                               <span className="text-xs font-semibold text-gray-500 uppercase">Vaccine Brand Name</span>
                               <div className="mt-1">
-                                {vaccine.vaccine_link ? (
-                                  <a
-                                    href={vaccine.vaccine_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline font-medium"
-                                  >
-                                    {vaccine.vaccine_brand_name}
-                                  </a>
-                                ) : (
-                                  <span className="font-medium">{vaccine.vaccine_brand_name}</span>
-                                )}
+                                <button
+                                  onClick={() => {
+                                    setSelectedVaccine(vaccine);
+                                  }}
+                                  className="text-blue-600 hover:underline font-medium text-left"
+                                >
+                                  {vaccine.vaccine_brand_name || ""}
+                                </button>
                               </div>
                             </div>
                             <div>
@@ -388,6 +407,130 @@ export function VaccinesClient({
           </div>
         </main>
       </div>
+
+      {/* Product Profile Dialog */}
+      <Dialog open={!!selectedVaccine} onOpenChange={(open) => {
+        if (!open) setSelectedVaccine(null);
+      }}>
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto p-0 mx-2 sm:mx-4">
+          {selectedVaccine && (
+            <>
+              <DialogHeader className="bg-gradient-to-r from-[#d17728] to-[#e6893a] px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 rounded-t-lg">
+                <DialogTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white break-words">
+                  {selectedVaccine.vaccine_brand_name || ""}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div>
+                    <span className="font-semibold text-gray-700">Pathogen:</span>
+                    <span className="ml-2 text-gray-600 break-words">{selectedVaccine.pathogen_name || ""}</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">Type:</span>
+                    <span className="ml-2 text-gray-600 break-words">{selectedVaccine.single_or_combination}</span>
+                  </div>
+                  {selectedVaccine.vaccine_link && (
+                    <div className="sm:col-span-2">
+                      <span className="font-semibold text-gray-700">Link:</span>
+                      <a
+                        href={selectedVaccine.vaccine_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-600 hover:underline break-all"
+                      >
+                        View Source
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {selectedVaccine.productProfiles && Array.isArray(selectedVaccine.productProfiles) && selectedVaccine.productProfiles.length > 0 ? (
+                  <div className="space-y-4 sm:space-y-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 border-b pb-2">
+                      Product Profiles
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {selectedVaccine.productProfiles.map((profile, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-hidden">
+                          <div className="flex flex-col gap-2 mb-2 sm:mb-3">
+                            <span className="px-2 sm:px-3 py-1 bg-[#d17728] text-white rounded font-semibold text-xs sm:text-sm w-fit">
+                              {profile.type}
+                            </span>
+                            <h4 className="font-semibold text-gray-800 text-xs sm:text-sm break-words">
+                              {profile.name}
+                            </h4>
+                          </div>
+                          
+                          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Composition:</span>
+                              <p className="text-gray-600 break-words">{profile.composition || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Strain Coverage:</span>
+                              <p className="text-gray-600 break-words">{profile.strainCoverage || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Indication:</span>
+                              <p className="text-gray-600 break-words">{profile.indication || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Contraindication:</span>
+                              <p className="text-gray-600 break-words">{profile.contraindication || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Dosing:</span>
+                              <p className="text-gray-600 break-words">{profile.dosing || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Immunogenicity:</span>
+                              <p className="text-gray-600 break-words">{profile.immunogenicity || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Efficacy:</span>
+                              <p className="text-gray-600 break-words">{profile.Efficacy || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Duration of Protection:</span>
+                              <p className="text-gray-600 break-words">{profile.durationOfProtection || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Co-Administration:</span>
+                              <p className="text-gray-600 break-words">{profile.coAdministration || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Reactogenicity:</span>
+                              <p className="text-gray-600 break-words">{profile.reactogenicity || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Safety:</span>
+                              <p className="text-gray-600 break-words">{profile.safety || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Vaccination Goal:</span>
+                              <p className="text-gray-600 break-words">{profile.vaccinationGoal || "-"}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700 block mb-1">Others:</span>
+                              <p className="text-gray-600 break-words">{profile.others || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No product profile information available for this vaccine.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
