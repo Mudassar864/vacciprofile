@@ -357,11 +357,17 @@ export function VaccinesClient({
                     )}
                     <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
                       {selectedPathogenData.image && (
-                        <img
-                          src={selectedPathogenData.image}
-                          alt={selectedPathogenData.name}
-                          className="w-full sm:w-48 rounded shadow-sm mx-auto sm:mx-0"
-                        />
+                        <div className="flex-shrink-0 w-full sm:w-48 md:w-64 lg:w-72 mx-auto sm:mx-0">
+                          <img
+                            src={selectedPathogenData.image}
+                            alt={selectedPathogenData.name}
+                            className="w-full h-auto max-w-full rounded shadow-sm object-contain"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
                       )}
 
                       {selectedPathogenData.bulletpoints && (
