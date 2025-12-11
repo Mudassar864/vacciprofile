@@ -47,12 +47,18 @@ export function NITAGsClient({
   const handleCountrySelect = useCallback((country: string) => {
     setSelectedCountry(country);
     setSidebarOpen(false);
-    router.push(`/nitags?country=${encodeURIComponent(country)}`);
+    if (country) {
+      router.push(`/nitags?country=${encodeURIComponent(country)}`);
+    } else {
+      router.push('/nitags');
+    }
   }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
-      <AlphabetNav onLetterClick={setActiveLetter} activeLetter={activeLetter} />
+      <div className="hidden md:block">
+        <AlphabetNav onLetterClick={setActiveLetter} activeLetter={activeLetter} />
+      </div>
 
       <div className="flex relative">
         {sidebarOpen && (

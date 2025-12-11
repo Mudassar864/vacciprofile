@@ -28,7 +28,7 @@ export function Header() {
               alt="VacciProfile Logo" 
               width={150} 
               height={40}
-              className="w-auto h-8 sm:h-10"
+              className="w-auto h-8 sm:h-20"
               priority
             />
         </div>
