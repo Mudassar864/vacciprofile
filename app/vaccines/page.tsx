@@ -45,22 +45,32 @@ async function fetchPathogensData() {
   const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
   
   try {
+    console.log('Fetching pathogens from:', `${API_BASE}/api/pathogens/populated`);
     const response = await fetch(
-      `${API_BASE}/pathogens?populate=true`,
+      `${API_BASE}/api/pathogens/populated`,
       { next: { revalidate: 3600 } } // Revalidate every hour
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', response.status, response.statusText, errorText);
       throw new Error(
         `Failed to fetch data: ${response.status} ${response.statusText}`
       );
     }
 
-    const data = await response.json();
+    const result = await response.json();
+    console.log('API Response:', { success: result.success, count: result.count, hasPathogens: !!result.pathogens });
 
+    // Backend returns { success: true, count: number, pathogens: [...] }
+    const data = result.pathogens || result.data || [];
+    
     if (!Array.isArray(data)) {
+      console.error('Invalid data format:', typeof data, data);
       throw new Error("Invalid data format received from API");
     }
+    
+    console.log('Pathogens count:', data.length);
 
     const transformedPathogens: PathogenData[] = [];
     const transformedVaccines: Vaccine[] = [];
@@ -73,7 +83,7 @@ async function fetchPathogensData() {
       }
 
       transformedPathogens.push({
-        pathogenId: pathogen.pathogenId,
+        pathogenId: pathogen.id || pathogen.pathogenId,
         name: pathogen.name,
         description: pathogen.description,
         image: pathogen.image,
@@ -103,15 +113,15 @@ async function fetchPathogensData() {
         });
 
         transformedVaccines.push({
-          licensed_vaccine_id: `${pathogen.pathogenId}-${vIndex}`,
+          licensed_vaccine_id: vaccine.id || `${pathogen.id || pathogen.pathogenId}-${vIndex}`,
           pathogen_name: pathogenName,
           vaccine_brand_name: vaccine.name,
           single_or_combination: vaccine.vaccineType === "single" ? "Single Pathogen Vaccine" : "Combination Vaccine",
           authority_names: authorityNames,
           authority_links: authorityLinks,
-          vaccine_link: vaccine.vaccineLink,
-          manufacturer: vaccine.manufacturer,
-          productProfiles: vaccine.productProfiles,
+          vaccine_link: vaccine.vaccineLink || vaccine.link,
+          manufacturer: vaccine.manufacturerNames ? (Array.isArray(vaccine.manufacturerNames) ? vaccine.manufacturerNames.join(', ') : vaccine.manufacturerNames) : vaccine.manufacturer,
+          productProfiles: vaccine.productProfiles || [],
         });
       });
     });
@@ -132,6 +142,12 @@ async function fetchPathogensData() {
       (a, b) => a.localeCompare(b)
     );
 
+    console.log('Transformed data:', {
+      vaccinesCount: transformedVaccines.length,
+      pathogensCount: transformedPathogens.length,
+      pathogenNamesCount: uniquePathogenNames.length
+    });
+
     return {
       vaccines: transformedVaccines,
       pathogensData: transformedPathogens,
@@ -139,6 +155,10 @@ async function fetchPathogensData() {
     };
   } catch (err) {
     console.error("Error fetching pathogens:", err);
+    if (err instanceof Error) {
+      console.error("Error message:", err.message);
+      console.error("Error stack:", err.stack);
+    }
     return {
       vaccines: [],
       pathogensData: [],
