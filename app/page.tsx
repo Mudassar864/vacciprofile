@@ -53,7 +53,7 @@ export default function Home() {
           <NavigationCard
             title="Comparison"
             description="Compare vaccines data and specifications based on pathogens"
-            href="#"
+            href="/compare"
             icon={GitCompare}
             variant="primary"
           />

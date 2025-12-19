@@ -48,7 +48,7 @@ async function fetchPathogensData() {
     console.log('Fetching pathogens from:', `${API_BASE}/api/pathogens/populated`);
     const response = await fetch(
       `${API_BASE}/api/pathogens/populated`,
-      { next: { revalidate: 3600 } } // Revalidate every hour
+      { cache: 'no-store' } // Disable caching for large data (>2MB)
     );
 
     if (!response.ok) {
