@@ -79,6 +79,8 @@ export function VaccinesClient({
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
+  const [loadingProductProfiles, setLoadingProductProfiles] = useState(false);
+  const [productProfilesCache, setProductProfilesCache] = useState<Record<string, ProductProfile[]>>({});
 
   useEffect(() => {
     const pathogenParam = searchParams.get("pathogen");
@@ -115,6 +117,66 @@ export function VaccinesClient({
   const handlePathogenClick = (pathogen: string) => {
     setSelectedPathogen(pathogen);
     router.push(`/vaccines?pathogen=${encodeURIComponent(pathogen)}`);
+  };
+
+  const fetchProductProfiles = async (vaccineName: string) => {
+    // Check cache first
+    if (productProfilesCache[vaccineName]) {
+      return productProfilesCache[vaccineName];
+    }
+
+    setLoadingProductProfiles(true);
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+      const response = await fetch(
+        `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product profiles: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const profiles = result.productProfiles || [];
+
+      // Cache the result
+      setProductProfilesCache((prev) => ({
+        ...prev,
+        [vaccineName]: profiles,
+      }));
+
+      return profiles;
+    } catch (error) {
+      console.error('Error fetching product profiles:', error);
+      return [];
+    } finally {
+      setLoadingProductProfiles(false);
+    }
+  };
+
+  const handleVaccineClick = async (vaccine: Vaccine) => {
+    const vaccineName = vaccine.vaccine_brand_name || '';
+    
+    // Check if we have cached profiles
+    if (vaccineName && productProfilesCache[vaccineName]) {
+      setSelectedVaccine({
+        ...vaccine,
+        productProfiles: productProfilesCache[vaccineName],
+      });
+    } else {
+      // Set vaccine first (without profiles) to show the dialog
+      setSelectedVaccine(vaccine);
+      
+      // Fetch product profiles in the background
+      if (vaccineName) {
+        const profiles = await fetchProductProfiles(vaccineName);
+        // Update the selected vaccine with product profiles
+        setSelectedVaccine({
+          ...vaccine,
+          productProfiles: profiles,
+        });
+      }
+    }
   };
 
   return (
@@ -246,10 +308,7 @@ export function VaccinesClient({
                           <div className="hidden md:grid md:grid-cols-3 gap-4 p-4">
                             <div>
                               <button
-                                onClick={() => {
-                                  setSelectedVaccine(vaccine);
-                                  console.log(vaccine);
-                                }}
+                                onClick={() => handleVaccineClick(vaccine)}
                                 className="text-blue-600 hover:underline text-left font-medium cursor-pointer"
                               >
                                 {vaccine.vaccine_brand_name || ""}
@@ -293,9 +352,7 @@ export function VaccinesClient({
                               <span className="text-xs font-semibold text-gray-500 uppercase">Vaccine Brand Name</span>
                               <div className="mt-1">
                                 <button
-                                  onClick={() => {
-                                    setSelectedVaccine(vaccine);
-                                  }}
+                                  onClick={() => handleVaccineClick(vaccine)}
                                   className="text-blue-600 hover:underline font-medium text-left"
                                 >
                                   {vaccine.vaccine_brand_name || ""}
@@ -446,7 +503,12 @@ export function VaccinesClient({
                   )}
                 </div>
 
-                {selectedVaccine.productProfiles && Array.isArray(selectedVaccine.productProfiles) && selectedVaccine.productProfiles.length > 0 ? (
+                {loadingProductProfiles ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#d17728]"></div>
+                    <p className="mt-2 text-gray-600">Loading product profiles...</p>
+                  </div>
+                ) : selectedVaccine.productProfiles && Array.isArray(selectedVaccine.productProfiles) && selectedVaccine.productProfiles.length > 0 ? (
                   <div className="space-y-4 sm:space-y-6">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 border-b pb-2">
                       Product Profiles
