@@ -9,7 +9,7 @@ async function fetchManufacturers(): Promise<Manufacturer[]> {
     console.log('Fetching manufacturers from:', `${API_BASE}/api/manufacturers/populated`);
     const response = await fetch(
       `${API_BASE}/api/manufacturers/populated`,
-      { next: { revalidate: 3600 } } // Revalidate every hour
+      { cache: 'no-store' } // Disable caching
     );
     
     if (!response.ok) {
@@ -98,18 +98,19 @@ export default async function ManufacturersPage({
 }) {
   const manufacturers = await fetchManufacturers();
   
-  let initialSelectedManufacturerId: string | undefined = undefined;
+  let initialSelectedManufacturerName: string | undefined = undefined;
   if (searchParams.manufacturer) {
-    const found = manufacturers.find(m => m._id === searchParams.manufacturer);
+    const decodedName = decodeURIComponent(searchParams.manufacturer);
+    const found = manufacturers.find(m => m.name === decodedName);
     if (found) {
-      initialSelectedManufacturerId = searchParams.manufacturer;
+      initialSelectedManufacturerName = decodedName;
     }
   }
 
   return (
     <ManufacturersClient
       initialManufacturers={manufacturers}
-      initialSelectedManufacturerId={initialSelectedManufacturerId}
+      initialSelectedManufacturerName={initialSelectedManufacturerName}
     />
   );
 }

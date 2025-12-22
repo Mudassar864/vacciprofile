@@ -21,7 +21,7 @@ async function fetchCandidates() {
     console.log('Fetching candidates from:', `${API_BASE}/api/manufacturer-candidates`);
     const response = await fetch(
       `${API_BASE}/api/manufacturer-candidates`,
-      { next: { revalidate: 3600 } }
+      { cache: 'no-store' } // Disable caching
     );
     
     if (!response.ok) {

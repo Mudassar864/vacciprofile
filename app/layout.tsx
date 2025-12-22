@@ -4,9 +4,19 @@ import { Inter } from 'next/font/google';
 import { Header } from '@/components/header';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
-import NextTopLoader from 'nextjs-toploader';
+import dynamic from 'next/dynamic';
 
-const inter = Inter({ subsets: ['latin'] });
+// Optimize font loading - only load latin subset with better performance
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // Better performance
+  preload: true,
+});
+
+// Lazy load NextTopLoader - it's not critical for initial render
+const NextTopLoader = dynamic(() => import('nextjs-toploader'), {
+  ssr: false,
+});
 
 export const metadata: Metadata = {
   title: 'VacciProfile - Comprehensive Vaccine Information Database',

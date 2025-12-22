@@ -9,7 +9,7 @@ async function fetchNITAGs(): Promise<NITAG[]> {
     console.log('Fetching NITAGs from:', `${API_BASE}/api/nitags`);
     const response = await fetch(
       `${API_BASE}/api/nitags`,
-      { next: { revalidate: 3600 } } // Revalidate every hour
+      { cache: 'no-store' } // Disable caching
     );
     
     if (!response.ok) {

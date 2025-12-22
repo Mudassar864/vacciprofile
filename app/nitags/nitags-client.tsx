@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlphabetNav } from '@/components/alphabet-nav';
-import WorldMap from '@/components/world-map';
 import { Search, Menu, X } from 'lucide-react';
+
+// Lazy load heavy WorldMap component
+const WorldMap = lazy(() => import('@/components/world-map'));
 
 export interface NITAG {
   country: string;
@@ -45,13 +47,13 @@ export function NITAGsClient({
   }, [countries, searchQuery, activeLetter]);
 
   const handleCountrySelect = useCallback((country: string) => {
+    // Update URL immediately using window.history, then update state
+    const url = country ? `/nitags?country=${encodeURIComponent(country)}` : '/nitags';
+    window.history.pushState({}, '', url);
     setSelectedCountry(country);
     setSidebarOpen(false);
-    if (country) {
-      router.push(`/nitags?country=${encodeURIComponent(country)}`);
-    } else {
-      router.push('/nitags');
-    }
+    // Use replace to avoid adding to history stack for query param changes
+    router.replace(url);
   }, [router]);
 
   return (
@@ -168,11 +170,20 @@ export function NITAGsClient({
           </div>
 
           <div className="h-[calc(100vh-120px)] sm:h-[calc(100vh-140px)] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200/50 overflow-hidden">
-            <WorldMap
-              nitags={nitags}
-              selectedCountry={selectedCountry}
-              onCountryClick={handleCountrySelect}
-            />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d17728] mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading map...</p>
+                </div>
+              </div>
+            }>
+              <WorldMap
+                nitags={nitags}
+                selectedCountry={selectedCountry}
+                onCountryClick={handleCountrySelect}
+              />
+            </Suspense>
           </div>
         </main>
       </div>

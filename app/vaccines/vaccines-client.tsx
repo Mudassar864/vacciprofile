@@ -85,7 +85,6 @@ export function VaccinesClient({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedVaccine, setSelectedVaccine] = useState<Vaccine | null>(null);
   const [loadingProductProfiles, setLoadingProductProfiles] = useState(false);
-  const [productProfilesCache, setProductProfilesCache] = useState<Record<string, ProductProfile[]>>({});
 
   useEffect(() => {
     const pathogenParam = searchParams.get("pathogen");
@@ -120,21 +119,21 @@ export function VaccinesClient({
   };
 
   const handlePathogenClick = (pathogen: string) => {
+    // Update URL immediately using window.history, then update state
+    const url = `/vaccines?pathogen=${encodeURIComponent(pathogen)}`;
+    window.history.pushState({}, '', url);
     setSelectedPathogen(pathogen);
-    router.push(`/vaccines?pathogen=${encodeURIComponent(pathogen)}`);
+    // Use replace to avoid adding to history stack for query param changes
+    router.replace(url);
   };
 
   const fetchProductProfiles = async (vaccineName: string) => {
-    // Check cache first
-    if (productProfilesCache[vaccineName]) {
-      return productProfilesCache[vaccineName];
-    }
-
     setLoadingProductProfiles(true);
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
       const response = await fetch(
-        `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`
+        `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`,
+        { cache: 'no-store' } // Disable caching
       );
 
       if (!response.ok) {
@@ -143,12 +142,6 @@ export function VaccinesClient({
 
       const result = await response.json();
       const profiles = result.productProfiles || [];
-
-      // Cache the result
-      setProductProfilesCache((prev) => ({
-        ...prev,
-        [vaccineName]: profiles,
-      }));
 
       return profiles;
     } catch (error) {
@@ -162,13 +155,6 @@ export function VaccinesClient({
   const handleVaccineClick = async (vaccine: Vaccine) => {
     const vaccineName = vaccine.vaccine_brand_name || '';
     
-    // Check if we have cached profiles
-    if (vaccineName && productProfilesCache[vaccineName]) {
-      setSelectedVaccine({
-        ...vaccine,
-        productProfiles: productProfilesCache[vaccineName],
-      });
-    } else {
       // Set vaccine first (without profiles) to show the dialog
       setSelectedVaccine(vaccine);
       
@@ -180,7 +166,6 @@ export function VaccinesClient({
           ...vaccine,
           productProfiles: profiles,
         });
-      }
     }
   };
 
@@ -325,8 +310,9 @@ export function VaccinesClient({
                             </div>
 
                             <div>
-                              {vaccine.authority_names.map((authority, idx) => {
-                                const link = vaccine.authority_links[idx] || "";
+                              {Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
+                                const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                const link = vaccine.authority_links[authorityIndex] || "";
 
                                 return (
                                   <span key={idx}>
@@ -371,8 +357,9 @@ export function VaccinesClient({
                             <div>
                               <span className="text-xs font-semibold text-gray-500 uppercase">Licensing Authority</span>
                               <div className="mt-1">
-                                {vaccine.authority_names.map((authority, idx) => {
-                                  const link = vaccine.authority_links[idx] || "";
+                                {Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
+                                  const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                  const link = vaccine.authority_links[authorityIndex] || "";
 
                                   return (
                                     <span key={idx}>

@@ -61,17 +61,17 @@ export interface Manufacturer {
 
 interface ManufacturersClientProps {
   initialManufacturers: Manufacturer[];
-  initialSelectedManufacturerId?: string;
+  initialSelectedManufacturerName?: string;
 }
 
 export function ManufacturersClient({
   initialManufacturers,
-  initialSelectedManufacturerId,
+  initialSelectedManufacturerName,
 }: ManufacturersClientProps) {
   const router = useRouter();
   const [manufacturers] = useState<Manufacturer[]>(initialManufacturers);
   const [selectedManufacturer, setSelectedManufacturer] = useState<Manufacturer | null>(
-    initialManufacturers.find(m => m._id === initialSelectedManufacturerId) || initialManufacturers[0] || null
+    initialManufacturers.find(m => m.name === initialSelectedManufacturerName) || initialManufacturers[0] || null
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
@@ -96,8 +96,12 @@ export function ManufacturersClient({
   };
 
   const handleManufacturerClick = (manufacturer: Manufacturer) => {
+    // Update URL immediately using window.history, then update state
+    const url = `/manufacturers?manufacturer=${encodeURIComponent(manufacturer.name)}`;
+    window.history.pushState({}, '', url);
     setSelectedManufacturer(manufacturer);
-    router.push(`/manufacturers?manufacturer=${encodeURIComponent(manufacturer._id)}`);
+    // Use replace to avoid adding to history stack for query param changes
+    router.replace(url);
   };
 
   const getPhaseDisplay = (clinicalPhase: string, manufacturer: string) => {

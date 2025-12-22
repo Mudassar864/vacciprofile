@@ -58,8 +58,12 @@ export function CandidatesClient({
   };
 
   const handlePathogenClick = (pathogen: string) => {
+    // Update URL immediately using window.history, then update state
+    const url = `/candidates?pathogen=${encodeURIComponent(pathogen)}`;
+    window.history.pushState({}, '', url);
     setSelectedPathogen(pathogen);
-    router.push(`/candidates?pathogen=${encodeURIComponent(pathogen)}`);
+    // Use replace to avoid adding to history stack for query param changes
+    router.replace(url);
   };
 
   const getPhaseDisplay = (clinicalPhase: string, manufacturer: string) => {

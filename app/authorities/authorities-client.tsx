@@ -92,8 +92,12 @@ export function AuthoritiesClient({
   const selectedVaccines = selectedLicenser ? (vaccinesByLicenser[selectedLicenser.acronym] || []) : [];
 
   const handleLicenserClick = (licenser: Licenser) => {
+    // Update URL immediately using window.history, then update state
+    const url = `/authorities?licenser=${encodeURIComponent(licenser.licenserId)}`;
+    window.history.pushState({}, '', url);
     setSelectedLicenser(licenser);
-    router.push(`/authorities?licenser=${encodeURIComponent(licenser.licenserId)}`);
+    // Use replace to avoid adding to history stack for query param changes
+    router.replace(url);
   };
 
   return (

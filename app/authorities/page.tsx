@@ -10,7 +10,7 @@ async function fetchAuthoritiesData() {
     console.log('Fetching licensers from:', `${API_BASE}/api/licensers`);
     const licensersResponse = await fetch(
       `${API_BASE}/api/licensers`,
-      { next: { revalidate: 3600 } } // Revalidate every hour
+      { cache: 'no-store' } // Disable caching
     );
     if (!licensersResponse.ok) {
       const errorText = await licensersResponse.text();
@@ -40,7 +40,7 @@ async function fetchAuthoritiesData() {
     console.log('Fetching vaccines from:', `${API_BASE}/api/vaccines/populated`);
     const vaccinesResponse = await fetch(
       `${API_BASE}/api/vaccines/populated`,
-      { next: { revalidate: 3600 } }
+      { cache: 'no-store' } // Disable caching
     );
     if (!vaccinesResponse.ok) {
       const errorText = await vaccinesResponse.text();

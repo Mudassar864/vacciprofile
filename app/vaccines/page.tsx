@@ -103,13 +103,13 @@ async function fetchPathogensData() {
 
         const authorityNames: string[] = [];
         const authorityLinks: string[] = [];
+        const seenAuthorities = new Set<string>();
 
         licensingDates.forEach((licensing: any) => {
-          if (licensing.name) {
+          if (licensing.name && !seenAuthorities.has(licensing.name)) {
+            seenAuthorities.add(licensing.name);
             authorityNames.push(licensing.name);
-          }
-          if (licensing.source) {
-            authorityLinks.push(licensing.source);
+            authorityLinks.push(licensing.source || "");
           }
         });
 
