@@ -29,6 +29,16 @@ interface ProductProfile {
   others: string;
 }
 
+interface LicensingDate {
+  id: string;
+  vaccineName: string;
+  name: string;
+  type: string;
+  approvalDate: string;
+  source: string;
+  lastUpdateOnVaccine: string;
+}
+
 interface Vaccine {
   licensed_vaccine_id: string;
   pathogen_name?: string;
@@ -39,6 +49,7 @@ interface Vaccine {
   vaccine_link?: string;
   manufacturer?: string;
   productProfiles?: ProductProfile[];
+  licensingDates?: LicensingDate[];
 }
 
 interface PathogenData {
@@ -152,19 +163,45 @@ export function VaccinesClient({
     }
   };
 
+  const fetchLicensingDates = async (vaccineName: string) => {
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+      const response = await fetch(
+        `${API_BASE}/api/licensing-dates?vaccineName=${encodeURIComponent(vaccineName)}`,
+        { cache: 'no-store' } // Disable caching
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch licensing dates: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const licensingDates = result.licensingDates || [];
+
+      return licensingDates;
+    } catch (error) {
+      console.error('Error fetching licensing dates:', error);
+      return [];
+    }
+  };
+
   const handleVaccineClick = async (vaccine: Vaccine) => {
     const vaccineName = vaccine.vaccine_brand_name || '';
     
       // Set vaccine first (without profiles) to show the dialog
       setSelectedVaccine(vaccine);
       
-      // Fetch product profiles in the background
+      // Fetch product profiles and licensing dates in the background
       if (vaccineName) {
-        const profiles = await fetchProductProfiles(vaccineName);
-        // Update the selected vaccine with product profiles
+        const [profiles, licensingDates] = await Promise.all([
+          fetchProductProfiles(vaccineName),
+          fetchLicensingDates(vaccineName)
+        ]);
+        // Update the selected vaccine with product profiles and licensing dates
         setSelectedVaccine({
           ...vaccine,
           productProfiles: profiles,
+          licensingDates: licensingDates,
         });
     }
   };
@@ -574,6 +611,54 @@ export function VaccinesClient({
                         </div>
                       ))}
                     </div>
+                    
+                    {/* Licensing Data Section - at bottom of product profiles */}
+                    {selectedVaccine.licensingDates && selectedVaccine.licensingDates.length > 0 && (
+                      <div className="mt-6 pt-4 border-t-2 border-gray-300">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">
+                          Licensing Data
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                          {selectedVaccine.licensingDates.map((license, idx) => (
+                            <div key={idx} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 space-y-2 text-xs sm:text-sm">
+                              <div>
+                                <span className="font-semibold text-gray-700">Authority:</span>
+                                <span className="ml-2 text-gray-600 break-words">{license.name || "-"}</span>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-700">Approval Date:</span>
+                                <span className="ml-2 text-gray-600 break-words">{license.approvalDate || "-"}</span>
+                              </div>
+                              {license.type && license.type !== 'N/A' && (
+                                <div>
+                                  <span className="font-semibold text-gray-700">Type:</span>
+                                  <span className="ml-2 text-gray-600 break-words">{license.type}</span>
+                                </div>
+                              )}
+                              {license.source && (
+                                <div>
+                                  <span className="font-semibold text-gray-700">Source:</span>
+                                  <a
+                                    href={license.source}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ml-2 text-blue-600 hover:underline break-all"
+                                  >
+                                    View Source
+                                  </a>
+                                </div>
+                              )}
+                              {license.lastUpdateOnVaccine && license.lastUpdateOnVaccine !== 'N/A' && (
+                                <div>
+                                  <span className="font-semibold text-gray-700">Last Updated:</span>
+                                  <span className="ml-2 text-gray-600 break-words">{license.lastUpdateOnVaccine}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">

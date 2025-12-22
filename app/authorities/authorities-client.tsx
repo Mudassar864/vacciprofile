@@ -26,20 +26,44 @@ export interface Vaccine {
 interface AuthoritiesClientProps {
   initialLicensers: Licenser[];
   initialVaccinesByLicenser: { [key: string]: Vaccine[] };
-  initialSelectedLicenserId?: number;
+  initialSelectedLicenserName?: string;
+  initialSelectedCountry?: string;
 }
 
 export function AuthoritiesClient({
   initialLicensers,
   initialVaccinesByLicenser,
-  initialSelectedLicenserId,
+  initialSelectedLicenserName,
+  initialSelectedCountry,
 }: AuthoritiesClientProps) {
   const router = useRouter();
   const [licensers] = useState<Licenser[]>(initialLicensers);
   const [vaccinesByLicenser] = useState<{ [key: string]: Vaccine[] }>(initialVaccinesByLicenser);
-  const [selectedLicenser, setSelectedLicenser] = useState<Licenser | null>(
-    initialLicensers.find(l => l.licenserId === initialSelectedLicenserId) || initialLicensers[0] || null
-  );
+  
+  // Determine default licenser: country first, then licenser name, then EMA, then first licenser
+  let defaultLicenser: Licenser | null = null;
+  
+  if (initialSelectedCountry) {
+    // If country is specified, find first licenser in that country
+    const countryLicensers = initialLicensers.filter(l => 
+      (l.country || '').toLowerCase() === initialSelectedCountry.toLowerCase()
+    );
+    defaultLicenser = countryLicensers[0] || null;
+  } else if (initialSelectedLicenserName) {
+    // If licenser name is specified, find by acronym
+    defaultLicenser = initialLicensers.find(l => 
+      l.acronym?.toUpperCase() === initialSelectedLicenserName.toUpperCase()
+    ) || null;
+  }
+  
+  // Fallback to EMA, then first licenser
+  if (!defaultLicenser) {
+    defaultLicenser = initialLicensers.find(l => l.acronym?.toUpperCase() === 'EMA') ||
+      initialLicensers[0] ||
+      null;
+  }
+  
+  const [selectedLicenser, setSelectedLicenser] = useState<Licenser | null>(defaultLicenser);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
   const [expandedProfile, setExpandedProfile] = useState(true);
@@ -93,7 +117,8 @@ export function AuthoritiesClient({
 
   const handleLicenserClick = (licenser: Licenser) => {
     // Update URL immediately using window.history, then update state
-    const url = `/authorities?licenser=${encodeURIComponent(licenser.licenserId)}`;
+    // Use licenser acronym (name) instead of ID
+    const url = `/authorities?licenser=${encodeURIComponent(licenser.acronym)}`;
     window.history.pushState({}, '', url);
     setSelectedLicenser(licenser);
     // Use replace to avoid adding to history stack for query param changes
@@ -181,17 +206,25 @@ export function AuthoritiesClient({
                   (licenser) => (licenser.country || 'Unknown') === country
                 );
                 const firstLicenser = licensersInCountry[0];
+                const isSelected = selectedLicenser && licensersInCountry.some(l => 
+                  l.licenserId === selectedLicenser.licenserId
+                );
+                
                 return (
                   <button
                     key={country}
                     onClick={() => {
                       if (firstLicenser) {
-                        handleLicenserClick(firstLicenser);
+                        // Use country name in URL when clicking on country
+                        const url = `/authorities?country=${encodeURIComponent(country)}`;
+                        window.history.pushState({}, '', url);
+                        setSelectedLicenser(firstLicenser);
+                        router.replace(url);
                         setSidebarOpen(false);
                       }
                     }}
                     className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-orange-100 transition-colors ${
-                      selectedLicenser && licensersInCountry.some(l => l.licenserId === selectedLicenser.licenserId)
+                      isSelected
                         ? 'bg-[#d17728] text-white font-semibold'
                         : 'text-gray-700'
                     }`}

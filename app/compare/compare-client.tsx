@@ -68,6 +68,8 @@ export function CompareClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
   const [selectedVaccines, setSelectedVaccines] = useState<string[]>([]);
+  const [vaccinesWithProfiles, setVaccinesWithProfiles] = useState<Vaccine[]>(initialVaccines);
+  const [loadingProductProfiles, setLoadingProductProfiles] = useState<{ [key: string]: boolean }>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewFilter, setViewFilter] = useState({
     single: true,
@@ -90,13 +92,36 @@ export function CompareClient({
     }
   }, []); // Only run once on mount
 
+  const fetchProductProfiles = async (vaccineName: string) => {
+    setLoadingProductProfiles(prev => ({ ...prev, [vaccineName]: true }));
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+      const response = await fetch(
+        `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`,
+        { cache: 'no-store' }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product profiles: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result.productProfiles || [];
+    } catch (error) {
+      console.error('Error fetching product profiles:', error);
+      return [];
+    } finally {
+      setLoadingProductProfiles(prev => ({ ...prev, [vaccineName]: false }));
+    }
+  };
+
   const filteredPathogens = pathogens.filter(pathogen => {
     const matchesSearch = pathogen.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLetter = !activeLetter || pathogen.charAt(0).toUpperCase() === activeLetter;
     return matchesSearch && matchesLetter;
   });
 
-  const pathogenVaccines = vaccines.filter(v => {
+  const pathogenVaccines = vaccinesWithProfiles.filter(v => {
     const matchesPathogen = v.pathogen_name === selectedPathogen;
     const matchesFilter = 
       (viewFilter.single && v.single_or_combination === "Single Pathogen Vaccine") ||
@@ -104,27 +129,50 @@ export function CompareClient({
     return matchesPathogen && matchesFilter;
   });
 
-  const toggleVaccineSelection = (vaccineId: string) => {
-    setSelectedVaccines(prev => {
-      // Only keep vaccines from the current pathogen
-      const currentPathogenVaccineIds = vaccines
-        .filter(v => v.pathogen_name === selectedPathogen)
-        .map(v => v.licensed_vaccine_id);
-      
-      // Filter out any vaccines from other pathogens
-      const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
-      
-      const newSelection = filteredPrev.includes(vaccineId)
-        ? filteredPrev.filter(id => id !== vaccineId)
-        : [...filteredPrev, vaccineId];
-      
-      // Don't update URL - keep vaccines in state only
-      return newSelection;
-    });
+  const toggleVaccineSelection = async (vaccineId: string) => {
+    const isCurrentlySelected = selectedVaccines.includes(vaccineId);
+    
+    if (isCurrentlySelected) {
+      // Deselecting - just remove from selection
+      setSelectedVaccines(prev => {
+        const currentPathogenVaccineIds = vaccinesWithProfiles
+          .filter(v => v.pathogen_name === selectedPathogen)
+          .map(v => v.licensed_vaccine_id);
+        const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
+        return filteredPrev.filter(id => id !== vaccineId);
+      });
+    } else {
+      // Selecting - add to selection and fetch product profiles
+      setSelectedVaccines(prev => {
+        const currentPathogenVaccineIds = vaccinesWithProfiles
+          .filter(v => v.pathogen_name === selectedPathogen)
+          .map(v => v.licensed_vaccine_id);
+        const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
+        return [...filteredPrev, vaccineId];
+      });
+
+      // Find the vaccine and fetch its product profiles
+      const vaccine = vaccinesWithProfiles.find(v => v.licensed_vaccine_id === vaccineId);
+      if (vaccine && vaccine.vaccine_brand_name) {
+        const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
+        
+        // Update the vaccine with product profiles in the state
+        setVaccinesWithProfiles(prev => {
+          const updated = prev.map(v => {
+            if (v.licensed_vaccine_id === vaccineId) {
+              return { ...v, productProfiles: profiles };
+            }
+            return v;
+          });
+          return updated;
+        });
+      }
+    }
   };
 
   // Only show selected vaccines that belong to the current pathogen
-  const selectedVaccineDetails = vaccines.filter(v => 
+  // Use vaccinesWithProfiles to get vaccines with their product profiles
+  const selectedVaccineDetails = vaccinesWithProfiles.filter(v => 
     selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === selectedPathogen
   );
 
@@ -350,34 +398,48 @@ export function CompareClient({
                               <input
                                 type="checkbox"
                                 checked={pathogenVaccines.length > 0 && pathogenVaccines.every(v => selectedVaccines.includes(v.licensed_vaccine_id))}
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                   const allIds = pathogenVaccines.map(v => v.licensed_vaccine_id);
                                   
                                   if (e.target.checked) {
                                     // Select all vaccines for current pathogen only
+                                    const newIds = allIds.filter(id => !selectedVaccines.includes(id));
                                     setSelectedVaccines(prev => {
                                       // Remove any vaccines from other pathogens first
-                                      const currentPathogenVaccineIds = vaccines
+                                      const currentPathogenVaccineIds = vaccinesWithProfiles
                                         .filter(v => v.pathogen_name === selectedPathogen)
                                         .map(v => v.licensed_vaccine_id);
                                       const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
                                       
                                       // Add all current pathogen vaccines
                                       const combined = Array.from(new Set([...filteredPrev, ...allIds]));
-                                      // Don't update URL - vaccines are not stored in URL
                                       return combined;
                                     });
+                                    
+                                    // Fetch product profiles for newly selected vaccines
+                                    for (const vaccineId of newIds) {
+                                      const vaccine = vaccinesWithProfiles.find(v => v.licensed_vaccine_id === vaccineId);
+                                      if (vaccine && vaccine.vaccine_brand_name) {
+                                        const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
+                                        setVaccinesWithProfiles(prev => {
+                                          const updated = prev.map(v => {
+                                            if (v.licensed_vaccine_id === vaccineId) {
+                                              return { ...v, productProfiles: profiles };
+                                            }
+                                            return v;
+                                          });
+                                          return updated;
+                                        });
+                                      }
+                                    }
                                   } else {
                                     // Unselect all vaccines for current pathogen
                                     setSelectedVaccines(prev => {
                                       // Keep vaccines from other pathogens, remove current pathogen vaccines
-                                      const currentPathogenVaccineIds = vaccines
+                                      const currentPathogenVaccineIds = vaccinesWithProfiles
                                         .filter(v => v.pathogen_name === selectedPathogen)
                                         .map(v => v.licensed_vaccine_id);
-                                      const filtered = prev.filter(id => !currentPathogenVaccineIds.includes(id));
-                                      
-                                      // Don't update URL - vaccines are not stored in URL
-                                      return filtered;
+                                      return prev.filter(id => !currentPathogenVaccineIds.includes(id));
                                     });
                                   }
                                 }}
