@@ -15,13 +15,25 @@ async function fetchAuthoritiesData() {
     if (!licensersResponse.ok) {
       const errorText = await licensersResponse.text();
       console.error('Licensers API Error:', licensersResponse.status, licensersResponse.statusText, errorText);
-      // Note: This endpoint requires authentication, so it might fail
-      console.warn('Licensers endpoint requires authentication. Returning empty array.');
+      console.warn('Failed to fetch licensers. Returning empty array.');
     }
     const licensersResult = licensersResponse.ok ? await licensersResponse.json() : { licensers: [] };
     // Backend returns { success: true, count: number, licensers: [...] }
     const licensersData = licensersResult.licensers || licensersResult.data || [];
-    const licensersList: Licenser[] = Array.isArray(licensersData) ? licensersData : [];
+    // Transform API response to match frontend interface
+    // API returns { id, acronym, region, country, fullName, description, website }
+    // Frontend expects { licenserId, acronym, region, country, fullName, description, website }
+    const licensersList: Licenser[] = Array.isArray(licensersData) 
+      ? licensersData.map((l: any) => ({
+          licenserId: parseInt(l.id?.replace(/[^0-9]/g, '') || '0', 10) || 0, // Convert id to number
+          acronym: l.acronym || '',
+          region: l.region || '',
+          country: l.country || null,
+          fullName: l.fullName || '',
+          description: l.description || '',
+          website: l.website || '',
+        }))
+      : [];
     console.log('Licensers count:', licensersList.length);
 
     // Fetch vaccines with populated data and group by licenser
@@ -51,21 +63,55 @@ async function fetchAuthoritiesData() {
       const licensingDates = vaccine.licensingDates || [];
       
       licensingDates.forEach((ld: any) => {
+        // The licensing date 'name' field contains the licenser name/acronym
+        // We need to match it with licenser acronym or fullName
         const licenserName = ld.name || '';
         if (!licenserName) return;
         
-        if (!vaccinesMap[licenserName]) {
-          vaccinesMap[licenserName] = [];
+        // Try to find matching licenser by acronym or fullName
+        // Use the licenser name from licensing date as key, or match to acronym if found
+        let matchingLicenserAcronym = licenserName;
+        if (licensersList.length > 0) {
+          const matchingLicenser = licensersList.find(
+            (l: Licenser) => 
+              l.acronym?.toLowerCase() === licenserName.toLowerCase() ||
+              l.fullName?.toLowerCase() === licenserName.toLowerCase() ||
+              l.acronym?.toLowerCase().includes(licenserName.toLowerCase()) ||
+              licenserName.toLowerCase().includes(l.acronym?.toLowerCase() || '')
+          );
+          if (matchingLicenser) {
+            matchingLicenserAcronym = matchingLicenser.acronym;
+          }
+        }
+        
+        if (!vaccinesMap[matchingLicenserAcronym]) {
+          vaccinesMap[matchingLicenserAcronym] = [];
         }
         
         // Check if this vaccine is already added for this licenser
-        const exists = vaccinesMap[licenserName].some(
+        const exists = vaccinesMap[matchingLicenserAcronym].some(
           (v: Vaccine) => v.vaccineBrandName === vaccine.name
         );
         
         if (!exists) {
-          vaccinesMap[licenserName].push({
-            vaccineId: vaccine.id || 0,
+          // Parse pathogenNames and manufacturerNames (they are comma-separated strings)
+          const pathogenNamesStr = vaccine.pathogenNames || '';
+          const manufacturerNamesStr = vaccine.manufacturerNames || '';
+          
+          const pathogens = typeof pathogenNamesStr === 'string'
+            ? pathogenNamesStr.split(',').map(p => p.trim()).filter(Boolean)
+            : Array.isArray(pathogenNamesStr)
+            ? pathogenNamesStr
+            : [];
+          
+          const manufacturers = typeof manufacturerNamesStr === 'string'
+            ? manufacturerNamesStr.split(',').map(m => m.trim()).filter(Boolean)
+            : Array.isArray(manufacturerNamesStr)
+            ? manufacturerNamesStr
+            : [];
+          
+          vaccinesMap[matchingLicenserAcronym].push({
+            vaccineId: parseInt(String(vaccine.id || '0').replace(/[^0-9]/g, '') || '0', 10) || 0,
             vaccineBrandName: vaccine.name || 'Unknown Vaccine',
             vaccineType: (vaccine.vaccineType || 'single')
               .toString()
@@ -73,16 +119,8 @@ async function fetchAuthoritiesData() {
               .includes('combination')
               ? 'combination'
               : 'single',
-            pathogens: Array.isArray(vaccine.pathogenNames)
-              ? vaccine.pathogenNames
-              : typeof vaccine.pathogenNames === 'string'
-              ? [vaccine.pathogenNames]
-              : [],
-            manufacturers: Array.isArray(vaccine.manufacturerNames)
-              ? vaccine.manufacturerNames
-              : typeof vaccine.manufacturerNames === 'string'
-              ? [vaccine.manufacturerNames]
-              : []
+            pathogens: pathogens,
+            manufacturers: manufacturers
           });
         }
       });

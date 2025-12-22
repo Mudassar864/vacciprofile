@@ -110,7 +110,7 @@ async function fetchPathogensData() {
           authority_links: authorityLinks,
           vaccine_link: vaccine.vaccineLink || vaccine.link,
           manufacturer: vaccine.manufacturerNames ? (Array.isArray(vaccine.manufacturerNames) ? vaccine.manufacturerNames.join(', ') : vaccine.manufacturerNames) : vaccine.manufacturer,
-          productProfiles: vaccine.productProfiles || [],
+          productProfiles: [], // Product profiles fetched on demand when needed
         });
       });
     });

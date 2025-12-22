@@ -27,8 +27,7 @@ async function fetchCandidates() {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error:', response.status, response.statusText, errorText);
-      // Note: This endpoint requires authentication
-      console.warn('Manufacturer candidates endpoint requires authentication. Returning empty array.');
+      console.warn('Failed to fetch manufacturer candidates. Returning empty array.');
       return {
         candidates: [],
         pathogens: [],

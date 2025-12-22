@@ -15,8 +15,7 @@ async function fetchNITAGs(): Promise<NITAG[]> {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error:', response.status, response.statusText, errorText);
-      // Note: This endpoint requires authentication
-      console.warn('NITAGs endpoint requires authentication. Returning empty array.');
+      console.warn('Failed to fetch NITAGs. Returning empty array.');
       return [];
     }
     
@@ -34,7 +33,7 @@ async function fetchNITAGs(): Promise<NITAG[]> {
         availableWebsite: item.availableWebsite || '',
         websiteUrl: item.websiteUrl || '',
         nationalNitagName: item.nationalNitagName || '',
-        yearEstablished: item.yearEstablished || null,
+        yearEstablished: item.yearEstablished ? (typeof item.yearEstablished === 'string' ? parseInt(item.yearEstablished, 10) || null : item.yearEstablished) : null,
       }));
       console.log('Transformed NITAGs count:', transformed.length);
       return transformed;

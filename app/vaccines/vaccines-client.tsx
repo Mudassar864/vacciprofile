@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, Menu, X } from "lucide-react";
 import { AlphabetNav } from "@/components/alphabet-nav";
@@ -65,6 +65,11 @@ export function VaccinesClient({
 }: VaccinesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Ensure searchParams is available
+  if (!searchParams) {
+    console.warn('searchParams is not available');
+  }
   const [vaccines] = useState<Vaccine[]>(initialVaccines);
   const [pathogensData] = useState<PathogenData[]>(initialPathogensData);
   const [pathogens] = useState<string[]>(initialPathogens);

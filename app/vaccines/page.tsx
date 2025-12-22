@@ -1,4 +1,5 @@
 import { VaccinesClient } from './vaccines-client';
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,7 +121,13 @@ async function fetchPathogensData() {
           authority_names: authorityNames,
           authority_links: authorityLinks,
           vaccine_link: vaccine.vaccineLink || vaccine.link,
-          manufacturer: vaccine.manufacturerNames ? (Array.isArray(vaccine.manufacturerNames) ? vaccine.manufacturerNames.join(', ') : vaccine.manufacturerNames) : vaccine.manufacturer,
+          manufacturer: vaccine.manufacturerNames 
+            ? (Array.isArray(vaccine.manufacturerNames) 
+                ? vaccine.manufacturerNames.join(', ') 
+                : typeof vaccine.manufacturerNames === 'string'
+                ? vaccine.manufacturerNames
+                : '')
+            : vaccine.manufacturer || '',
           productProfiles: [], // Don't load product profiles initially - will be fetched on demand
         });
       });
@@ -183,11 +190,20 @@ export default async function VaccinesPage({
   }
 
   return (
-    <VaccinesClient
-      initialVaccines={vaccines}
-      initialPathogensData={pathogensData}
-      initialPathogens={pathogens}
-      initialSelectedPathogen={initialSelectedPathogen}
-    />
+    <Suspense fallback={
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d17728] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading vaccines...</p>
+        </div>
+      </div>
+    }>
+      <VaccinesClient
+        initialVaccines={vaccines}
+        initialPathogensData={pathogensData}
+        initialPathogens={pathogens}
+        initialSelectedPathogen={initialSelectedPathogen}
+      />
+    </Suspense>
   );
 }
