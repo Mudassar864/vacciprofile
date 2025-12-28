@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { Search, Menu, X, ExternalLink } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,126 +59,116 @@ export function CompareClient({
   initialSelectedPathogen,
 }: CompareClientProps) {
   const searchParams = useSearchParams();
-  const [vaccines] = useState<Vaccine[]>(initialVaccines);
-  const [pathogensData] = useState<PathogenData[]>(initialPathogensData);
-  const [pathogens] = useState<string[]>(initialPathogens);
-  const [selectedPathogen, setSelectedPathogen] = useState<string>(
-    initialSelectedPathogen || initialPathogens[0] || ""
-  );
+  const router = useRouter();
+  
+  // Use Next.js searchParams directly
+  const pathogenParam = searchParams?.get("pathogen");
+  const currentPathogen = pathogenParam && initialPathogens.includes(decodeURIComponent(pathogenParam))
+    ? decodeURIComponent(pathogenParam)
+    : initialSelectedPathogen || initialPathogens[0] || "";
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
   const [selectedVaccines, setSelectedVaccines] = useState<string[]>([]);
   const [vaccinesWithProfiles, setVaccinesWithProfiles] = useState<Vaccine[]>(initialVaccines);
-  const [loadingProductProfiles, setLoadingProductProfiles] = useState<{ [key: string]: boolean }>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewFilter, setViewFilter] = useState({
     single: true,
     combination: true,
   });
   const [isChangingPathogen, setIsChangingPathogen] = useState(false);
+  const [loadingProfiles, setLoadingProfiles] = useState<{ [key: string]: boolean }>({});
 
-  // Only read initial pathogen from URL on mount, don't track changes
-  useEffect(() => {
-    const pathogenParam = searchParams.get("pathogen");
-    
-    // Only set pathogen from URL if it's valid and different from current
-    if (pathogenParam && pathogens.length > 0) {
-      const decodedPathogen = decodeURIComponent(pathogenParam);
-      if (pathogens.includes(decodedPathogen) && decodedPathogen !== selectedPathogen) {
-        setSelectedPathogen(decodedPathogen);
-        setSelectedVaccines([]);
-        setIsChangingPathogen(false);
-      }
-    }
-  }, []); // Only run once on mount
-
+  // Fetch product profiles for a vaccine
   const fetchProductProfiles = async (vaccineName: string) => {
-    setLoadingProductProfiles(prev => ({ ...prev, [vaccineName]: true }));
+    if (loadingProfiles[vaccineName]) return;
+    
+    setLoadingProfiles(prev => ({ ...prev, [vaccineName]: true }));
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
       const response = await fetch(
         `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`,
         { cache: 'no-store' }
       );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch product profiles: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Failed: ${response.status}`);
       const result = await response.json();
       return result.productProfiles || [];
     } catch (error) {
       console.error('Error fetching product profiles:', error);
       return [];
     } finally {
-      setLoadingProductProfiles(prev => ({ ...prev, [vaccineName]: false }));
+      setLoadingProfiles(prev => ({ ...prev, [vaccineName]: false }));
     }
   };
 
-  const filteredPathogens = pathogens.filter(pathogen => {
+  // Fetch product profiles for selected vaccines
+  useEffect(() => {
+    const loadProfiles = async () => {
+      const selectedDetails = vaccinesWithProfiles.filter(v => 
+        selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === currentPathogen
+      );
+      
+      for (const vaccine of selectedDetails) {
+        if (vaccine.vaccine_brand_name && !vaccine.productProfiles) {
+          const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
+          if (profiles.length > 0) {
+            setVaccinesWithProfiles(prev => 
+              prev.map(v => 
+                v.licensed_vaccine_id === vaccine.licensed_vaccine_id 
+                  ? { ...v, productProfiles: profiles }
+                  : v
+              )
+            );
+          }
+        }
+      }
+    };
+    if (selectedVaccines.length > 0) {
+      loadProfiles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVaccines, currentPathogen]);
+
+  const filteredPathogens = initialPathogens.filter(pathogen => {
     const matchesSearch = pathogen.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLetter = !activeLetter || pathogen.charAt(0).toUpperCase() === activeLetter;
     return matchesSearch && matchesLetter;
   });
 
   const pathogenVaccines = vaccinesWithProfiles.filter(v => {
-    const matchesPathogen = v.pathogen_name === selectedPathogen;
+    const matchesPathogen = v.pathogen_name === currentPathogen;
     const matchesFilter = 
       (viewFilter.single && v.single_or_combination === "Single Pathogen Vaccine") ||
       (viewFilter.combination && v.single_or_combination === "Combination Vaccine");
     return matchesPathogen && matchesFilter;
   });
 
-  const toggleVaccineSelection = async (vaccineId: string) => {
+  const toggleVaccineSelection = (vaccineId: string) => {
     const isCurrentlySelected = selectedVaccines.includes(vaccineId);
     
     if (isCurrentlySelected) {
-      // Deselecting - just remove from selection
       setSelectedVaccines(prev => {
         const currentPathogenVaccineIds = vaccinesWithProfiles
-          .filter(v => v.pathogen_name === selectedPathogen)
+          .filter(v => v.pathogen_name === currentPathogen)
           .map(v => v.licensed_vaccine_id);
         const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
         return filteredPrev.filter(id => id !== vaccineId);
       });
     } else {
-      // Selecting - add to selection and fetch product profiles
       setSelectedVaccines(prev => {
         const currentPathogenVaccineIds = vaccinesWithProfiles
-          .filter(v => v.pathogen_name === selectedPathogen)
+          .filter(v => v.pathogen_name === currentPathogen)
           .map(v => v.licensed_vaccine_id);
         const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
         return [...filteredPrev, vaccineId];
       });
-
-      // Find the vaccine and fetch its product profiles
-      const vaccine = vaccinesWithProfiles.find(v => v.licensed_vaccine_id === vaccineId);
-      if (vaccine && vaccine.vaccine_brand_name) {
-        const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
-        
-        // Update the vaccine with product profiles in the state
-        setVaccinesWithProfiles(prev => {
-          const updated = prev.map(v => {
-            if (v.licensed_vaccine_id === vaccineId) {
-              return { ...v, productProfiles: profiles };
-            }
-            return v;
-          });
-          return updated;
-        });
-      }
     }
   };
 
-  // Only show selected vaccines that belong to the current pathogen
-  // Use vaccinesWithProfiles to get vaccines with their product profiles
-  const selectedVaccineDetails = vaccinesWithProfiles.filter(v => 
-    selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === selectedPathogen
-  );
 
   const handlePathogenClick = (pathogen: string) => {
     // Only update if clicking a different pathogen
-    if (pathogen === selectedPathogen) {
+    if (pathogen === currentPathogen) {
       setSidebarOpen(false);
       return;
     }
@@ -188,9 +178,7 @@ export function CompareClient({
     
     // Clear vaccine selection when pathogen changes
     setSelectedVaccines([]);
-    setSelectedPathogen(pathogen);
-    
-    // Don't update URL - keep everything in state
+    router.push(`/compare?pathogen=${encodeURIComponent(pathogen)}`);
     setSidebarOpen(false);
     
     // Clear loading state after a short delay for smooth transition
@@ -204,6 +192,11 @@ export function CompareClient({
     // Don't update URL - vaccines are not stored in URL
   };
 
+
+  // Get selected vaccine details for comparison
+  const selectedVaccineDetails = vaccinesWithProfiles.filter(v => 
+    selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === currentPathogen
+  );
 
   // Get all unique product profile types from selected vaccines
   // Filter out profiles where composition equals "- not licensed yet -"
@@ -251,19 +244,21 @@ export function CompareClient({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search pathogens..."
+                placeholder="Type to search pathogens..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d17728] focus:border-transparent text-sm shadow-sm transition-all"
+                aria-label="Search pathogens"
               />
               <Search className="absolute right-3 top-3 text-gray-400" size={18} />
             </div>
+            <p className="text-xs text-gray-500 mt-2 px-1">💡 Select a pathogen, then choose vaccines to compare</p>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {filteredPathogens.length > 0 ? (
               filteredPathogens.map(pathogen => {
-                const isSelected = selectedPathogen === pathogen;
+                const isSelected = currentPathogen === pathogen;
                 return (
                   <button
                     key={pathogen}
@@ -301,7 +296,7 @@ export function CompareClient({
             >
               <Menu size={20} className="text-gray-700" />
               <span className="font-medium text-gray-700">
-                {selectedPathogen || "Select Pathogen"}
+                {currentPathogen || "Select Pathogen"}
               </span>
             </button>
           </div>
@@ -312,7 +307,7 @@ export function CompareClient({
               <div className="bg-[#d17728] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg sm:rounded-t-xl">
                 <h2 className="text-lg sm:text-xl font-bold">Licensed Vaccines</h2>
                 <p className="text-xs sm:text-sm text-orange-100 mt-1">
-                  Select vaccines to compare
+                  ☑️ Check the boxes below to select vaccines for comparison
                 </p>
               </div>
               <div className="p-4 sm:p-6">
@@ -407,7 +402,7 @@ export function CompareClient({
                                     setSelectedVaccines(prev => {
                                       // Remove any vaccines from other pathogens first
                                       const currentPathogenVaccineIds = vaccinesWithProfiles
-                                        .filter(v => v.pathogen_name === selectedPathogen)
+                                        .filter(v => v.pathogen_name === currentPathogen)
                                         .map(v => v.licensed_vaccine_id);
                                       const filteredPrev = prev.filter(id => currentPathogenVaccineIds.includes(id));
                                       
@@ -416,28 +411,13 @@ export function CompareClient({
                                       return combined;
                                     });
                                     
-                                    // Fetch product profiles for newly selected vaccines
-                                    for (const vaccineId of newIds) {
-                                      const vaccine = vaccinesWithProfiles.find(v => v.licensed_vaccine_id === vaccineId);
-                                      if (vaccine && vaccine.vaccine_brand_name) {
-                                        const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
-                                        setVaccinesWithProfiles(prev => {
-                                          const updated = prev.map(v => {
-                                            if (v.licensed_vaccine_id === vaccineId) {
-                                              return { ...v, productProfiles: profiles };
-                                            }
-                                            return v;
-                                          });
-                                          return updated;
-                                        });
-                                      }
-                                    }
+                                    // Product profiles will be fetched automatically by useEffect
                                   } else {
                                     // Unselect all vaccines for current pathogen
                                     setSelectedVaccines(prev => {
                                       // Keep vaccines from other pathogens, remove current pathogen vaccines
                                       const currentPathogenVaccineIds = vaccinesWithProfiles
-                                        .filter(v => v.pathogen_name === selectedPathogen)
+                                        .filter(v => v.pathogen_name === currentPathogen)
                                         .map(v => v.licensed_vaccine_id);
                                       return prev.filter(id => !currentPathogenVaccineIds.includes(id));
                                     });
@@ -484,9 +464,10 @@ export function CompareClient({
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:underline text-xs flex items-center gap-1"
+                                                title={`Visit ${authority} website (opens in new tab)`}
                                               >
-                                                {authority}
-                                                <ExternalLink size={12} />
+                                                <span>{authority}</span>
+                                                <ExternalLink size={12} className="opacity-70" />
                                               </a>
                                             ) : (
                                               <span className="text-gray-700 text-xs">{authority}</span>
@@ -515,9 +496,9 @@ export function CompareClient({
                 )}
 
                 {selectedVaccines.length > 0 && (
-                  <div className="mt-4 flex items-center justify-between">
-                    <p className="text-sm text-gray-600">
-                      {selectedVaccines.length} vaccine{selectedVaccines.length !== 1 ? 's' : ''} selected
+                  <div className="mt-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800 font-medium">
+                      ✓ {selectedVaccines.length} vaccine{selectedVaccines.length !== 1 ? 's' : ''} selected - Scroll down to view comparison
                     </p>
                     <button
                       onClick={clearSelection}
@@ -647,9 +628,10 @@ export function CompareClient({
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-600 hover:underline flex items-center gap-1"
+                                            title={`Visit ${authority} website (opens in new tab)`}
                                           >
-                                            {authority}
-                                            <ExternalLink size={12} />
+                                            <span>{authority}</span>
+                                            <ExternalLink size={12} className="opacity-70" />
                                           </a>
                                         ) : (
                                           <span className="text-gray-700">{authority}</span>
@@ -667,7 +649,7 @@ export function CompareClient({
                         {selectedVaccineDetails.some(v => v.vaccine_link) && (
                           <tr>
                             <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm text-gray-900 sticky left-0 bg-white z-10">
-                              Link
+                              Official Source
                             </td>
                             {selectedVaccineDetails.map(vaccine => (
                               <td key={vaccine.licensed_vaccine_id} className="px-4 sm:px-6 py-3 sm:py-4">
@@ -677,9 +659,10 @@ export function CompareClient({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 hover:underline text-xs sm:text-sm flex items-center gap-1"
+                                    title="Visit official vaccine source (opens in new tab)"
                                   >
-                                    View Source
-                                    <ExternalLink size={12} />
+                                    <span>View Official Source</span>
+                                    <ExternalLink size={12} className="opacity-70" />
                                   </a>
                                 ) : (
                                   <span className="text-gray-400 text-xs sm:text-sm">-</span>
@@ -694,117 +677,155 @@ export function CompareClient({
                 </div>
 
                 {/* Product Profiles Comparison */}
-                {allProductProfileTypes.length > 0 && (
-                  <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200">
-                    <div className="bg-gray-100 px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg sm:rounded-t-xl">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900">Product Profiles Comparison</h3>
-                    </div>
-                    <div className="p-4 sm:p-6">
-                      <div className="space-y-6">
-                        {allProductProfileTypes.map(profileType => {
-                          // Get vaccines that have valid profiles for this type (not "- not licensed yet -")
-                          const vaccinesWithValidProfiles = selectedVaccineDetails.filter(vaccine => {
-                            const profile = (vaccine.productProfiles || [])
-                              .find(p => {
-                                const composition = p.composition?.trim().toLowerCase();
-                                return p.type === profileType && 
-                                       composition && 
-                                       composition !== '- not licensed yet -';
-                              });
-                            return !!profile;
-                          });
+                {(() => {
+                  // Collect all valid profiles from all selected vaccines
+                  const allProfiles: (ProductProfile & { vaccineName: string })[] = [];
+                  selectedVaccineDetails.forEach(vaccine => {
+                    (vaccine.productProfiles || []).forEach(profile => {
+                      const composition = profile.composition?.trim().toLowerCase();
+                      if (composition && composition !== '- not licensed yet -') {
+                        allProfiles.push({
+                          ...profile,
+                          vaccineName: vaccine.vaccine_brand_name || 'Unknown'
+                        });
+                      }
+                    });
+                  });
 
-                          // Only show this profile type section if there's at least one valid profile
-                          if (vaccinesWithValidProfiles.length === 0) {
-                            return null;
-                          }
+                  // Sort profiles: EMA, WHO, FDA first (in that order), then all others
+                  const priorityOrder = ['EMA', 'WHO', 'FDA'];
+                  const sortedProfiles = allProfiles.sort((a, b) => {
+                    const aType = (a.type || '').toUpperCase();
+                    const bType = (b.type || '').toUpperCase();
+                    
+                    // Check if profile type contains priority keywords
+                    const aHasEMA = aType.includes('EMA');
+                    const aHasWHO = aType.includes('WHO');
+                    const aHasFDA = aType.includes('FDA');
+                    const bHasEMA = bType.includes('EMA');
+                    const bHasWHO = bType.includes('WHO');
+                    const bHasFDA = bType.includes('FDA');
+                    
+                    // Priority order: EMA (0), WHO (1), FDA (2), others (3)
+                    const getPriority = (hasEMA: boolean, hasWHO: boolean, hasFDA: boolean) => {
+                      if (hasEMA) return 0;
+                      if (hasWHO) return 1;
+                      if (hasFDA) return 2;
+                      return 3;
+                    };
+                    
+                    const aPriority = getPriority(aHasEMA, aHasWHO, aHasFDA);
+                    const bPriority = getPriority(bHasEMA, bHasWHO, bHasFDA);
+                    
+                    // Sort by priority
+                    if (aPriority !== bPriority) {
+                      return aPriority - bPriority;
+                    }
+                    
+                    // If same priority, maintain original order
+                    return 0;
+                  });
 
-                          return (
-                            <div key={profileType} className="border border-gray-200 rounded-lg overflow-hidden">
-                              <div className="bg-[#d17728] text-white px-4 py-2">
-                                <h4 className="font-semibold text-sm sm:text-base">{profileType}</h4>
+                  if (sortedProfiles.length === 0) {
+                    return null;
+                  }
+
+                  return (
+                    <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200">
+                      <div className="bg-gray-100 px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg sm:rounded-t-xl">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">Product Profiles Comparison</h3>
+                      </div>
+                      <div className="p-4 sm:p-6">
+                        {/* Horizontal scrollable container */}
+                        <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+                          <div className="flex gap-3 sm:gap-4 min-w-max pb-4">
+                            {sortedProfiles.map((profile, index) => (
+                              <div 
+                                key={index} 
+                                className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] border border-gray-200 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 bg-white shadow-sm"
+                              >
+                                <div className="flex flex-col gap-2 mb-2 sm:mb-3">
+                                  <span className="px-2 sm:px-3 py-1 bg-[#d17728] text-white rounded font-semibold text-xs sm:text-sm w-fit">
+                                    {profile.type}
+                                  </span>
+                                  <h4 className="font-semibold text-gray-800 text-xs sm:text-sm break-words">
+                                    {profile.name}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 italic">
+                                    {profile.vaccineName}
+                                  </p>
+                                </div>
+                                
+                                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Composition:</span>
+                                    <p className="text-gray-600 break-words">{profile.composition || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Strain Coverage:</span>
+                                    <p className="text-gray-600 break-words">{profile.strainCoverage || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Indication:</span>
+                                    <p className="text-gray-600 break-words">{profile.indication || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Contraindication:</span>
+                                    <p className="text-gray-600 break-words">{profile.contraindication || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Dosing:</span>
+                                    <p className="text-gray-600 break-words">{profile.dosing || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Immunogenicity:</span>
+                                    <p className="text-gray-600 break-words">{profile.immunogenicity || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Efficacy:</span>
+                                    <p className="text-gray-600 break-words">{profile.Efficacy || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Duration of Protection:</span>
+                                    <p className="text-gray-600 break-words">{profile.durationOfProtection || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Co-Administration:</span>
+                                    <p className="text-gray-600 break-words">{profile.coAdministration || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Reactogenicity:</span>
+                                    <p className="text-gray-600 break-words">{profile.reactogenicity || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Safety:</span>
+                                    <p className="text-gray-600 break-words">{profile.safety || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Vaccination Goal:</span>
+                                    <p className="text-gray-600 break-words">{profile.vaccinationGoal || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-semibold text-gray-700 block mb-1">Others:</span>
+                                    <p className="text-gray-600 break-words">{profile.others || "-"}</p>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="overflow-x-auto">
-                                <table className="w-full min-w-[1000px]">
-                                  <thead className="bg-gray-50">
-                                    <tr>
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 min-w-[150px]">
-                                        Property
-                                      </th>
-                                      {vaccinesWithValidProfiles.map(vaccine => {
-                                        const profile = (vaccine.productProfiles || [])
-                                          .find(p => {
-                                            const composition = p.composition?.trim().toLowerCase();
-                                            return p.type === profileType && 
-                                                   composition && 
-                                                   composition !== '- not licensed yet -';
-                                          });
-                                        return (
-                                          <th key={vaccine.licensed_vaccine_id} className="px-4 py-2 text-left text-xs font-semibold text-gray-700 min-w-[200px]">
-                                            <div className="font-semibold text-gray-900 break-words">
-                                              {profile?.name || vaccine.vaccine_brand_name || 'Unknown'}
-                                            </div>
-                                          </th>
-                                        );
-                                      })}
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-gray-200">
-                                    {[
-                                      { key: 'composition', label: 'Composition' },
-                                      { key: 'strainCoverage', label: 'Strain Coverage' },
-                                      { key: 'indication', label: 'Indication' },
-                                      { key: 'contraindication', label: 'Contraindication' },
-                                      { key: 'dosing', label: 'Dosing' },
-                                      { key: 'immunogenicity', label: 'Immunogenicity' },
-                                      { key: 'Efficacy', label: 'Efficacy' },
-                                      { key: 'durationOfProtection', label: 'Duration of Protection' },
-                                      { key: 'coAdministration', label: 'Co-Administration' },
-                                      { key: 'reactogenicity', label: 'Reactogenicity' },
-                                      { key: 'safety', label: 'Safety' },
-                                      { key: 'vaccinationGoal', label: 'Vaccination Goal' },
-                                      { key: 'others', label: 'Others' },
-                                    ].map(({ key, label }) => (
-                                      <tr key={key}>
-                                        <td className="px-4 py-2 font-medium text-xs sm:text-sm text-gray-900 sticky left-0 bg-white z-10">
-                                          {label}
-                                        </td>
-                                        {vaccinesWithValidProfiles.map(vaccine => {
-                                          const profile = (vaccine.productProfiles || [])
-                                            .find(p => {
-                                              const composition = p.composition?.trim().toLowerCase();
-                                              return p.type === profileType && 
-                                                     composition && 
-                                                     composition !== '- not licensed yet -';
-                                            });
-                                          const value = profile ? (profile as any)[key] : null;
-                                          return (
-                                            <td key={vaccine.licensed_vaccine_id} className="px-4 py-2 text-xs sm:text-sm text-gray-700">
-                                              {value && value.trim() ? (
-                                                <div className="break-words whitespace-pre-wrap">{value}</div>
-                                              ) : (
-                                                <span className="text-gray-400">-</span>
-                                              )}
-                                            </td>
-                                          );
-                                        })}
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          );
-                        })}
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             ) : (
               <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
                 <p className="text-sm sm:text-base text-gray-500">
-                  Select vaccines above to compare them side-by-side
+                  👆 Select vaccines above using the checkboxes to compare them side-by-side
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  💡 Tip: Select 2-4 vaccines for the best comparison view
                 </p>
               </div>
             )}

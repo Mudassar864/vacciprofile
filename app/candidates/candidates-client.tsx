@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, ChevronDown, Menu, X } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, ChevronDown, Menu, X, ExternalLink, Clock } from 'lucide-react';
 import { AlphabetNav } from '@/components/alphabet-nav';
 
 interface Candidate {
@@ -29,11 +29,14 @@ export function CandidatesClient({
   initialSelectedPathogen,
 }: CandidatesClientProps) {
   const router = useRouter();
-  const [candidates] = useState<Candidate[]>(initialCandidates);
-  const [pathogens] = useState<string[]>(initialPathogens);
-  const [selectedPathogen, setSelectedPathogen] = useState<string>(
-    initialSelectedPathogen || initialPathogens[0] || ''
-  );
+  const searchParams = useSearchParams();
+  
+  // Use Next.js searchParams directly
+  const pathogenParam = searchParams?.get("pathogen");
+  const selectedPathogen = pathogenParam && initialPathogens.includes(decodeURIComponent(pathogenParam))
+    ? decodeURIComponent(pathogenParam)
+    : initialSelectedPathogen || initialPathogens[0] || '';
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
   const [expandedSections, setExpandedSections] = useState({
@@ -42,13 +45,13 @@ export function CandidatesClient({
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const filteredPathogens = pathogens.filter(pathogen => {
+  const filteredPathogens = initialPathogens.filter(pathogen => {
     const matchesSearch = pathogen.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLetter = !activeLetter || pathogen.charAt(0).toUpperCase() === activeLetter;
     return matchesSearch && matchesLetter;
   });
 
-  const selectedCandidates = candidates.filter(c => c.pathogenName === selectedPathogen);
+  const selectedCandidates = initialCandidates.filter(c => c.pathogenName === selectedPathogen);
 
   const toggleSection = (section: 'candidates' | 'pathogenProfile') => {
     setExpandedSections(prev => ({
@@ -58,12 +61,7 @@ export function CandidatesClient({
   };
 
   const handlePathogenClick = (pathogen: string) => {
-    // Update URL immediately using window.history, then update state
-    const url = `/candidates?pathogen=${encodeURIComponent(pathogen)}`;
-    window.history.pushState({}, '', url);
-    setSelectedPathogen(pathogen);
-    // Use replace to avoid adding to history stack for query param changes
-    router.replace(url);
+    router.push(`/candidates?pathogen=${encodeURIComponent(pathogen)}`);
   };
 
   const getPhaseDisplay = (clinicalPhase: string, manufacturer: string) => {
@@ -109,9 +107,11 @@ export function CandidatesClient({
           href={companyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hover:bg-green-200 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium hover:bg-green-200 transition-colors"
+          title="Visit company website for more details (opens in new tab)"
         >
-          {phase}
+          <span>{phase}</span>
+          <ExternalLink size={12} className="opacity-70" />
         </a>
       );
     }
@@ -154,13 +154,15 @@ export function CandidatesClient({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search pathogens..."
+                placeholder="Type to search pathogens..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                aria-label="Search pathogens"
               />
               <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
             </div>
+            <p className="text-xs text-gray-500 mt-2">💡 Click on a pathogen to view vaccine candidates</p>
           </div>
 
           <div className="flex-1 overflow-y-auto">
@@ -198,9 +200,12 @@ export function CandidatesClient({
             >
               <Menu size={20} />
               <span className="font-medium text-gray-700">
-                {selectedPathogen || "Select Pathogen"}
+                {selectedPathogen || "👆 Tap to select a pathogen"}
               </span>
             </button>
+            {!selectedPathogen && (
+              <p className="text-xs text-gray-500 mt-1 ml-1">Select a pathogen to view vaccine candidates</p>
+            )}
           </div>
           <div className="max-w-full">
             <div className="bg-gray-100 rounded-lg mb-4">
@@ -218,28 +223,31 @@ export function CandidatesClient({
               {expandedSections.candidates && (
                 <div className="px-3 sm:px-6 pb-4">
                   <div className="bg-white rounded shadow overflow-hidden">
-                    <div className="hidden md:grid md:grid-cols-6 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-semibold text-sm">
+                    <div className="hidden md:grid md:grid-cols-7 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-semibold text-sm">
                       <div className="col-span-2">Vaccine Name</div>
                       <div className="text-center bg-blue-50 rounded">Phase I</div>
                       <div className="text-center bg-green-50 rounded">Phase II</div>
                       <div className="text-center bg-purple-50 rounded">Phase III</div>
                       <div className="text-center bg-orange-50 rounded">Phase IV</div>
+                      <div>Last Updated</div>
                     </div>
                     {selectedCandidates.length > 0 ? (
                       selectedCandidates.map(candidate => {
                         const phases = getPhaseDisplay(candidate.clinicalPhase, candidate.manufacturer);
                         return (
                           <div key={candidate._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <div className="hidden md:grid md:grid-cols-6 gap-4 p-4 items-center">
+                            <div className="hidden md:grid md:grid-cols-7 gap-4 p-4 items-center">
                               <div className="col-span-2">
                                 {candidate.companyUrl ? (
                                   <a
                                     href={candidate.companyUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline font-medium"
+                                    className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1"
+                                    title="Visit company website (opens in new tab)"
                                   >
-                                    {candidate.name}
+                                    <span>{candidate.name}</span>
+                                    <ExternalLink size={12} className="opacity-70" />
                                   </a>
                                 ) : (
                                   <span className="font-medium">{candidate.name}</span>
@@ -249,9 +257,11 @@ export function CandidatesClient({
                                     href={candidate.other}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-blue-500 hover:underline mt-1 block"
+                                    className="text-xs text-blue-500 hover:underline mt-1 block inline-flex items-center gap-1"
+                                    title="View clinical trials information (opens in new tab)"
                                   >
-                                    Clinical Trials
+                                    <span>Clinical Trials</span>
+                                    <ExternalLink size={10} className="opacity-70" />
                                   </a>
                                 )}
                               </div>
@@ -259,6 +269,16 @@ export function CandidatesClient({
                               <div className="text-center bg-green-50/30">{getPhaseLabel(phases.phase_ii, candidate.companyUrl)}</div>
                               <div className="text-center bg-purple-50/30">{getPhaseLabel(phases.phase_iii, candidate.companyUrl)}</div>
                               <div className="text-center bg-orange-50/30">{getPhaseLabel(phases.phase_iv, candidate.companyUrl)}</div>
+                              <div className="text-gray-600 text-xs flex items-center gap-1">
+                                {candidate.lastUpdated ? (
+                                  <>
+                                    <Clock size={12} className="opacity-70" />
+                                    <span>{new Date(candidate.lastUpdated).toLocaleDateString()}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
 
                             <div className="md:hidden p-4 space-y-3">

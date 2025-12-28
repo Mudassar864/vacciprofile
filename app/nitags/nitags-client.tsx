@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, lazy, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AlphabetNav } from '@/components/alphabet-nav';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, ExternalLink } from 'lucide-react';
 
 // Lazy load heavy WorldMap component
 const WorldMap = lazy(() => import('@/components/world-map'));
@@ -15,6 +15,7 @@ export interface NITAG {
   websiteUrl: string;
   nationalNitagName: string;
   yearEstablished: number | null;
+  updatedAt?: string;
 }
 
 interface NITAGsClientProps {
@@ -27,34 +28,28 @@ export function NITAGsClient({
   initialSelectedCountry,
 }: NITAGsClientProps) {
   const router = useRouter();
-  const [nitags] = useState<NITAG[]>(initialNitags);
-  const [countries] = useState<string[]>(
-    Array.from(new Set(initialNitags.map(n => n.country))).sort()
-  );
-  const [selectedCountry, setSelectedCountry] = useState<string>(
-    initialSelectedCountry || ''
-  );
+  const searchParams = useSearchParams();
+  
+  // Use Next.js searchParams directly
+  const countryParam = searchParams?.get("country");
+  const selectedCountry = countryParam || initialSelectedCountry || '';
+  
+  const countries = Array.from(new Set(initialNitags.map(n => n.country))).sort();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const filteredCountries = useMemo(() => {
-    return countries.filter(country => {
+  const filteredCountries = countries.filter(country => {
       const matchesSearch = country.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesLetter = !activeLetter || country.charAt(0).toUpperCase() === activeLetter;
       return matchesSearch && matchesLetter;
     });
-  }, [countries, searchQuery, activeLetter]);
 
-  const handleCountrySelect = useCallback((country: string) => {
-    // Update URL immediately using window.history, then update state
+  const handleCountrySelect = (country: string) => {
     const url = country ? `/nitags?country=${encodeURIComponent(country)}` : '/nitags';
-    window.history.pushState({}, '', url);
-    setSelectedCountry(country);
+    router.push(url);
     setSidebarOpen(false);
-    // Use replace to avoid adding to history stack for query param changes
-    router.replace(url);
-  }, [router]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
@@ -89,20 +84,22 @@ export function NITAGsClient({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search countries..."
+                placeholder="Type to search countries..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d17728] focus:border-transparent text-sm shadow-sm transition-all"
+                aria-label="Search countries"
               />
               <Search className="absolute right-3 top-3 text-gray-400" size={18} />
             </div>
+            <p className="text-xs text-gray-500 mt-2">💡 Click on a country to view NITAG details</p>
           </div>
 
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             {filteredCountries.length > 0 ? (
               <>
                 {filteredCountries.map(country => {
-                  const countryNitag = nitags.find(n => n.country === country);
+                  const countryNitag = initialNitags.find(n => n.country === country);
                   const isAvailable = countryNitag?.availableNitag === 'Yes';
                   const hasWebsite = !!countryNitag?.websiteUrl;
                   const hasData = !!countryNitag;
@@ -159,14 +156,17 @@ export function NITAGsClient({
           <div className="lg:hidden mb-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all shadow-sm"
-              aria-label="Open sidebar"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all shadow-sm w-full"
+              aria-label="Open sidebar to select country"
             >
               <Menu size={20} className="text-gray-700" />
               <span className="font-medium text-gray-700">
-                {selectedCountry || "Select Country"}
+                {selectedCountry || "👆 Tap to select a country"}
               </span>
             </button>
+            {!selectedCountry && (
+              <p className="text-xs text-gray-500 mt-1 ml-1">Select a country to view NITAG information</p>
+            )}
           </div>
 
           <div className="h-[calc(100vh-120px)] sm:h-[calc(100vh-140px)] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200/50 overflow-hidden">
@@ -179,7 +179,7 @@ export function NITAGsClient({
               </div>
             }>
               <WorldMap
-                nitags={nitags}
+                nitags={initialNitags}
                 selectedCountry={selectedCountry}
                 onCountryClick={handleCountrySelect}
               />

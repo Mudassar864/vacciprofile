@@ -20,7 +20,8 @@ VacciPROFILE is a Next.js-based web application designed to help users explore a
 - 📊 Data visualization with charts and maps
 - 🌍 Interactive world map for geographic data
 - 📱 Mobile-friendly design
-- ⚡ Fast performance with Next.js App Router
+- ⚡ Fast performance with Next.js App Router and tag-based caching
+- 🔄 On-demand cache revalidation for immediate UI updates
 - 🔐 Type-safe development with TypeScript
 
 ## Tech Stack
@@ -105,6 +106,17 @@ The project uses several configuration files:
 - `tsconfig.json` - TypeScript configuration
 - `components.json` - shadcn/ui configuration
 - `postcss.config.js` - PostCSS configuration
+
+## Caching & Performance
+
+VacciPROFILE implements tag-based caching with on-demand revalidation for optimal performance:
+
+- **Server-side caching**: All data fetches are cached for 1 hour
+- **Tag-based invalidation**: Granular cache control by data type
+- **On-demand revalidation**: Immediate cache updates when data changes
+- **API endpoint**: `/api/revalidate` for triggering cache invalidation
+
+See [docs/CACHING.md](docs/CACHING.md) for detailed caching documentation and backend integration guide.
 
 ## Development
 

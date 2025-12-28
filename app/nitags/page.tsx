@@ -1,16 +1,12 @@
 import { NITAGsClient, NITAG } from './nitags-client';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 async function fetchNITAGs(): Promise<NITAG[]> {
   const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
   
   try {
     console.log('Fetching NITAGs from:', `${API_BASE}/api/nitags`);
-    const response = await fetch(
-      `${API_BASE}/api/nitags`,
-      { cache: 'no-store' } // Disable caching
-    );
+    const response = await fetchFromAPI(`${API_BASE}/api/nitags`);
     
     if (!response.ok) {
       const errorText = await response.text();

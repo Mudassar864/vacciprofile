@@ -1,7 +1,6 @@
 import { VaccinesClient } from './vaccines-client';
 import { Suspense } from 'react';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 interface ProductProfile {
   type: string;
@@ -30,6 +29,7 @@ interface Vaccine {
   authority_links: string[];
   vaccine_link?: string;
   manufacturer?: string;
+  lastUpdated?: string;
   productProfiles?: ProductProfile[];
 }
 
@@ -40,6 +40,7 @@ interface PathogenData {
   image?: string;
   bulletpoints?: string;
   link?: string;
+  updatedAt?: string;
 }
 
 async function fetchPathogensData() {
@@ -47,10 +48,7 @@ async function fetchPathogensData() {
   
   try {
     console.log('Fetching pathogens from:', `${API_BASE}/api/pathogens/populated`);
-    const response = await fetch(
-      `${API_BASE}/api/pathogens/populated`,
-      { cache: 'no-store' } // Disable caching for large data (>2MB)
-    );
+    const response = await fetchFromAPI(`${API_BASE}/api/pathogens/populated`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -90,6 +88,7 @@ async function fetchPathogensData() {
         image: pathogen.image,
         bulletpoints: pathogen.bulletpoints,
         link: pathogen.link,
+        updatedAt: pathogen.updatedAt || '',
       });
 
       const vaccinesArray = Array.isArray(pathogen.vaccines)
@@ -128,6 +127,7 @@ async function fetchPathogensData() {
                 ? vaccine.manufacturerNames
                 : '')
             : vaccine.manufacturer || '',
+          lastUpdated: vaccine.lastUpdated || vaccine.updatedAt || licensingDates[0]?.lastUpdateOnVaccine || '',
           productProfiles: [], // Don't load product profiles initially - will be fetched on demand
         });
       });

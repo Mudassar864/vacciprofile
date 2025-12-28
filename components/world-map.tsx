@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
-import { Calendar, Globe, ExternalLink, X } from 'lucide-react';
+import { Calendar, Globe, ExternalLink, X, Clock } from 'lucide-react';
 
 // Lazy load Dialog to reduce initial bundle size
 const Dialog = lazy(() => import('@/components/ui/dialog').then(mod => ({ default: mod.Dialog })));
@@ -17,6 +17,7 @@ interface NITAG {
   yearEstablished: number | null;
   availableWebsite: string;
   websiteUrl: string;
+  updatedAt?: string;
 }
 
 interface TooltipState {
@@ -377,9 +378,10 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-700 hover:underline break-all font-medium flex items-center gap-1.5 group"
+                        title="Visit NITAG official website (opens in new tab)"
                       >
-                        {selectedNitag.websiteUrl}
-                        <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <span>Visit Official NITAG Website</span>
+                        <ExternalLink size={14} className="opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </a>
                     </div>
                   ) : (
@@ -389,6 +391,15 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
                         Website:
                       </span>
                       <span className="text-gray-500 italic">Not available</span>
+                    </div>
+                  )}
+                  {selectedNitag.updatedAt && (
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 border-t pt-4 mt-4">
+                      <span className="font-semibold text-gray-700 sm:min-w-[120px] flex items-center gap-2">
+                        <Clock size={16} className="text-gray-500" />
+                        Last Updated:
+                      </span>
+                      <span className="text-gray-700 font-medium">{new Date(selectedNitag.updatedAt).toLocaleDateString()}</span>
                     </div>
                   )}
                 </div>

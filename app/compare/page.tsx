@@ -1,6 +1,5 @@
 import { CompareClient } from './compare-client';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 interface ProductProfile {
   type: string;
@@ -45,10 +44,7 @@ async function fetchPathogensData() {
   const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
   
   try {
-    const response = await fetch(
-      `${API_BASE}/api/pathogens/populated`,
-      { cache: 'no-store' } // Disable caching for large data (>2MB)
-    );
+    const response = await fetchFromAPI(`${API_BASE}/api/pathogens/populated`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.status}`);

@@ -1,6 +1,5 @@
 import { AuthoritiesClient, Licenser, Vaccine } from './authorities-client';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
 
@@ -8,10 +7,7 @@ async function fetchAuthoritiesData() {
   try {
     // Fetch licensers
     console.log('Fetching licensers from:', `${API_BASE}/api/licensers`);
-    const licensersResponse = await fetch(
-      `${API_BASE}/api/licensers`,
-      { cache: 'no-store' } // Disable caching
-    );
+    const licensersResponse = await fetchFromAPI(`${API_BASE}/api/licensers`);
     if (!licensersResponse.ok) {
       const errorText = await licensersResponse.text();
       console.error('Licensers API Error:', licensersResponse.status, licensersResponse.statusText, errorText);
@@ -32,16 +28,14 @@ async function fetchAuthoritiesData() {
           fullName: l.fullName || '',
           description: l.description || '',
           website: l.website || '',
+          updatedAt: l.updatedAt || '',
         }))
       : [];
     console.log('Licensers count:', licensersList.length);
 
     // Fetch vaccines with populated data and group by licenser
     console.log('Fetching vaccines from:', `${API_BASE}/api/vaccines/populated`);
-    const vaccinesResponse = await fetch(
-      `${API_BASE}/api/vaccines/populated`,
-      { cache: 'no-store' } // Disable caching
-    );
+    const vaccinesResponse = await fetchFromAPI(`${API_BASE}/api/vaccines/populated`);
     if (!vaccinesResponse.ok) {
       const errorText = await vaccinesResponse.text();
       console.error('Vaccines API Error:', vaccinesResponse.status, vaccinesResponse.statusText, errorText);
@@ -129,41 +123,50 @@ async function fetchAuthoritiesData() {
         const addVaccineToLicenser = (licenserKey: string) => {
           if (!vaccinesMap[licenserKey]) {
             vaccinesMap[licenserKey] = [];
-          }
-          
-          // Check if this vaccine is already added for this licenser
+        }
+        
+        // Check if this vaccine is already added for this licenser
           const exists = vaccinesMap[licenserKey].some(
-            (v: Vaccine) => v.vaccineBrandName === vaccine.name
-          );
+          (v: Vaccine) => v.vaccineBrandName === vaccine.name
+        );
+        
+        if (!exists) {
+          // Parse pathogenNames and manufacturerNames (they are comma-separated strings)
+          const pathogenNamesStr = vaccine.pathogenNames || '';
+          const manufacturerNamesStr = vaccine.manufacturerNames || '';
           
-          if (!exists) {
-            // Parse pathogenNames and manufacturerNames (they are comma-separated strings)
-            const pathogenNamesStr = vaccine.pathogenNames || '';
-            const manufacturerNamesStr = vaccine.manufacturerNames || '';
-            
-            const pathogens = typeof pathogenNamesStr === 'string'
-              ? pathogenNamesStr.split(',').map(p => p.trim()).filter(Boolean)
-              : Array.isArray(pathogenNamesStr)
-              ? pathogenNamesStr
-              : [];
-            
-            const manufacturers = typeof manufacturerNamesStr === 'string'
-              ? manufacturerNamesStr.split(',').map(m => m.trim()).filter(Boolean)
-              : Array.isArray(manufacturerNamesStr)
-              ? manufacturerNamesStr
-              : [];
-            
+          const pathogens = typeof pathogenNamesStr === 'string'
+            ? pathogenNamesStr.split(',').map(p => p.trim()).filter(Boolean)
+            : Array.isArray(pathogenNamesStr)
+            ? pathogenNamesStr
+            : [];
+          
+          const manufacturers = typeof manufacturerNamesStr === 'string'
+            ? manufacturerNamesStr.split(',').map(m => m.trim()).filter(Boolean)
+            : Array.isArray(manufacturerNamesStr)
+            ? manufacturerNamesStr
+            : [];
+          
             vaccinesMap[licenserKey].push({
-              vaccineId: parseInt(String(vaccine.id || '0').replace(/[^0-9]/g, '') || '0', 10) || 0,
-              vaccineBrandName: vaccine.name || 'Unknown Vaccine',
-              vaccineType: (vaccine.vaccineType || 'single')
-                .toString()
-                .toLowerCase()
-                .includes('combination')
-                ? 'combination'
-                : 'single',
-              pathogens: pathogens,
-              manufacturers: manufacturers
+            vaccineId: parseInt(String(vaccine.id || '0').replace(/[^0-9]/g, '') || '0', 10) || 0,
+            vaccineBrandName: vaccine.name || 'Unknown Vaccine',
+            vaccineType: (vaccine.vaccineType || 'single')
+              .toString()
+              .toLowerCase()
+              .includes('combination')
+              ? 'combination'
+              : 'single',
+            pathogens: pathogens,
+              manufacturers: manufacturers,
+              licensingDates: licensingDates.map((ld: any) => ({
+                id: ld.id || '',
+                vaccineName: vaccine.name || '',
+                name: ld.name || '',
+                type: ld.type || '',
+                approvalDate: ld.approvalDate || '',
+                source: ld.source || '',
+                lastUpdateOnVaccine: ld.lastUpdateOnVaccine || ld.lastUpdated || ''
+              }))
             });
           }
         };
@@ -244,7 +247,7 @@ export default async function AuthoritiesPage({
     : undefined;
   const initialSelectedCountry = searchParams.country
     ? decodeURIComponent(searchParams.country)
-    : undefined;
+      : undefined;
 
   return (
     <AuthoritiesClient

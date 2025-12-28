@@ -1,6 +1,5 @@
 import { CandidatesClient } from './candidates-client';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 interface Candidate {
   _id: string;
@@ -19,10 +18,7 @@ async function fetchCandidates() {
   
   try {
     console.log('Fetching candidates from:', `${API_BASE}/api/manufacturer-candidates`);
-    const response = await fetch(
-      `${API_BASE}/api/manufacturer-candidates`,
-      { cache: 'no-store' } // Disable caching
-    );
+    const response = await fetchFromAPI(`${API_BASE}/api/manufacturer-candidates`);
     
     if (!response.ok) {
       const errorText = await response.text();

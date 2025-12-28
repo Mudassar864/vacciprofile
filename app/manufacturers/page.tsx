@@ -1,16 +1,12 @@
 import { ManufacturersClient, Manufacturer } from './manufacturers-client';
-
-export const dynamic = 'force-dynamic';
+import { fetchFromAPI } from '@/lib/cache';
 
 async function fetchManufacturers(): Promise<Manufacturer[]> {
   const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
   
   try {
     console.log('Fetching manufacturers from:', `${API_BASE}/api/manufacturers/populated`);
-    const response = await fetch(
-      `${API_BASE}/api/manufacturers/populated`,
-      { cache: 'no-store' } // Disable caching
-    );
+    const response = await fetchFromAPI(`${API_BASE}/api/manufacturers/populated`);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -70,7 +66,7 @@ async function fetchManufacturers(): Promise<Manufacturer[]> {
           other: c.other,
           lastUpdated: c.updatedAt || c.lastUpdated,
         })),
-        lastUpdated: m.lastUpdated || m.updatedAt,
+        lastUpdated: m.updatedAt || m.lastUpdated,
       }));
       
       // Sort manufacturers alphabetically by name
