@@ -101,20 +101,60 @@ export function CompareClient({
     }
   };
 
+  // Filter vaccines for current pathogen (needed for product profile fetching)
+  const pathogenVaccines = vaccinesWithProfiles.filter(v => {
+    const matchesPathogen = v.pathogen_name === currentPathogen;
+    const matchesFilter = 
+      (viewFilter.single && v.single_or_combination === "Single Pathogen Vaccine") ||
+      (viewFilter.combination && v.single_or_combination === "Combination Vaccine");
+    return matchesPathogen && matchesFilter;
+  });
+
   // Fetch product profiles for selected vaccines
   useEffect(() => {
     const loadProfiles = async () => {
-      const selectedDetails = vaccinesWithProfiles.filter(v => 
-        selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === currentPathogen
+      // Get all selected vaccines from pathogenVaccines (the ones currently visible)
+      const selectedVaccinesList = pathogenVaccines.filter(v => 
+        selectedVaccines.includes(v.licensed_vaccine_id)
       );
       
-      for (const vaccine of selectedDetails) {
-        if (vaccine.vaccine_brand_name && !vaccine.productProfiles) {
-          const profiles = await fetchProductProfiles(vaccine.vaccine_brand_name);
+      if (selectedVaccinesList.length === 0) return;
+      
+      // Process each selected vaccine
+      for (const vaccine of selectedVaccinesList) {
+        // Check if vaccine already exists in vaccinesWithProfiles
+        const existingVaccine = vaccinesWithProfiles.find(v => 
+          v.licensed_vaccine_id === vaccine.licensed_vaccine_id && 
+          v.pathogen_name === currentPathogen
+        );
+        
+        // If vaccine doesn't exist in vaccinesWithProfiles, add it
+        if (!existingVaccine) {
+          setVaccinesWithProfiles(prev => {
+            // Check if it's already being added
+            const alreadyExists = prev.some(v => 
+              v.licensed_vaccine_id === vaccine.licensed_vaccine_id && 
+              v.pathogen_name === currentPathogen
+            );
+            if (alreadyExists) return prev;
+            return [...prev, { ...vaccine, productProfiles: [] }];
+          });
+        }
+        
+        // Fetch profiles if vaccine has a name and no profiles yet
+        const vaccineToCheck = existingVaccine || vaccine;
+        if (vaccineToCheck.vaccine_brand_name && 
+            (!vaccineToCheck.productProfiles || vaccineToCheck.productProfiles.length === 0)) {
+          
+          // Check if we're already loading this vaccine's profiles
+          if (loadingProfiles[vaccineToCheck.vaccine_brand_name]) continue;
+          
+          const profiles = await fetchProductProfiles(vaccineToCheck.vaccine_brand_name);
           if (profiles.length > 0) {
             setVaccinesWithProfiles(prev => 
               prev.map(v => 
-                v.licensed_vaccine_id === vaccine.licensed_vaccine_id 
+                v.licensed_vaccine_id === vaccine.licensed_vaccine_id && 
+                v.pathogen_name === currentPathogen
                   ? { ...v, productProfiles: profiles }
                   : v
               )
@@ -123,24 +163,17 @@ export function CompareClient({
         }
       }
     };
-    if (selectedVaccines.length > 0) {
+    
+    if (selectedVaccines.length > 0 && currentPathogen && pathogenVaccines.length > 0) {
       loadProfiles();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVaccines, currentPathogen]);
+  }, [selectedVaccines, currentPathogen, pathogenVaccines]);
 
   const filteredPathogens = initialPathogens.filter(pathogen => {
     const matchesSearch = pathogen.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLetter = !activeLetter || pathogen.charAt(0).toUpperCase() === activeLetter;
     return matchesSearch && matchesLetter;
-  });
-
-  const pathogenVaccines = vaccinesWithProfiles.filter(v => {
-    const matchesPathogen = v.pathogen_name === currentPathogen;
-    const matchesFilter = 
-      (viewFilter.single && v.single_or_combination === "Single Pathogen Vaccine") ||
-      (viewFilter.combination && v.single_or_combination === "Combination Vaccine");
-    return matchesPathogen && matchesFilter;
   });
 
   const toggleVaccineSelection = (vaccineId: string) => {
@@ -194,9 +227,37 @@ export function CompareClient({
 
 
   // Get selected vaccine details for comparison
-  const selectedVaccineDetails = vaccinesWithProfiles.filter(v => 
-    selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === currentPathogen
-  );
+  // First try to find in vaccinesWithProfiles, then fallback to pathogenVaccines
+  const selectedVaccineDetails = (() => {
+    // Filter from vaccinesWithProfiles first (includes product profiles)
+    const fromProfiles = vaccinesWithProfiles.filter(v => 
+      selectedVaccines.includes(v.licensed_vaccine_id) && v.pathogen_name === currentPathogen
+    );
+    
+    // If we found matches, return them
+    if (fromProfiles.length > 0) {
+      return fromProfiles;
+    }
+    
+    // Fallback: try to find in pathogenVaccines (current pathogen's vaccines)
+    const fromPathogen = pathogenVaccines.filter(v => 
+      selectedVaccines.includes(v.licensed_vaccine_id)
+    );
+    
+    return fromPathogen;
+  })();
+
+  // Debug logging (remove in production)
+  useEffect(() => {
+    if (selectedVaccines.length > 0) {
+      console.log('Selected vaccines:', selectedVaccines);
+      console.log('Current pathogen:', currentPathogen);
+      console.log('Vaccines with profiles count:', vaccinesWithProfiles.length);
+      console.log('Pathogen vaccines count:', pathogenVaccines.length);
+      console.log('Selected vaccine details count:', selectedVaccineDetails.length);
+      console.log('Selected vaccine details:', selectedVaccineDetails);
+    }
+  }, [selectedVaccines, currentPathogen, vaccinesWithProfiles, pathogenVaccines, selectedVaccineDetails]);
 
   // Get all unique product profile types from selected vaccines
   // Filter out profiles where composition equals "- not licensed yet -"
@@ -551,7 +612,8 @@ export function CompareClient({
                   </div>
                 </div>
               </div>
-            ) : selectedVaccineDetails.length > 0 ? (
+            ) : selectedVaccines.length > 0 ? (
+              selectedVaccineDetails.length > 0 ? (
               <div className="space-y-4 sm:space-y-6">
                 {/* Basic Comparison Table */}
                 <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200">
@@ -678,17 +740,20 @@ export function CompareClient({
 
                 {/* Product Profiles Comparison */}
                 {(() => {
-                  // Collect all valid profiles from all selected vaccines
+                  // Check if any profiles are currently being loaded
+                  const isLoadingProfiles = selectedVaccineDetails.some(v => 
+                    v.vaccine_brand_name && loadingProfiles[v.vaccine_brand_name]
+                  );
+                  
+                  // Collect all profiles from all selected vaccines
                   const allProfiles: (ProductProfile & { vaccineName: string })[] = [];
                   selectedVaccineDetails.forEach(vaccine => {
                     (vaccine.productProfiles || []).forEach(profile => {
-                      const composition = profile.composition?.trim().toLowerCase();
-                      if (composition && composition !== '- not licensed yet -') {
-                        allProfiles.push({
-                          ...profile,
-                          vaccineName: vaccine.vaccine_brand_name || 'Unknown'
-                        });
-                      }
+                      // Include all profiles - we'll display them all
+                      allProfiles.push({
+                        ...profile,
+                        vaccineName: vaccine.vaccine_brand_name || 'Unknown'
+                      });
                     });
                   });
 
@@ -726,7 +791,44 @@ export function CompareClient({
                     return 0;
                   });
 
+                  // Show loading state or empty state
+                  if (isLoadingProfiles) {
+                    return (
+                      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200">
+                        <div className="bg-gray-100 px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg sm:rounded-t-xl">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900">Product Profiles Comparison</h3>
+                        </div>
+                        <div className="p-8 sm:p-12 text-center">
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#d17728] mb-4"></div>
+                          <p className="text-sm sm:text-base text-gray-600">
+                            Loading product profiles...
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
                   if (sortedProfiles.length === 0) {
+                    // Check if vaccines have empty product profiles arrays (meaning they were checked but no profiles found)
+                    const hasCheckedProfiles = selectedVaccineDetails.some(v => 
+                      v.productProfiles !== undefined && v.productProfiles.length === 0
+                    );
+                    
+                    if (hasCheckedProfiles) {
+                      return (
+                        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200">
+                          <div className="bg-gray-100 px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg sm:rounded-t-xl">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900">Product Profiles Comparison</h3>
+                          </div>
+                          <div className="p-8 sm:p-12 text-center">
+                            <p className="text-sm sm:text-base text-gray-500">
+                              No product profiles available for the selected vaccines.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     return null;
                   }
 
@@ -819,6 +921,22 @@ export function CompareClient({
                   );
                 })()}
               </div>
+              ) : (
+                <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+                  <p className="text-sm sm:text-base text-gray-600 font-medium">
+                    ⚠️ Vaccines selected but no data found
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Selected: {selectedVaccines.length} vaccine{selectedVaccines.length !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Current pathogen: {currentPathogen || 'None'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-4">
+                    Try selecting vaccines again or check if they match the current pathogen filter.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
                 <p className="text-sm sm:text-base text-gray-500">
