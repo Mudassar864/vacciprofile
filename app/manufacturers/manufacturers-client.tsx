@@ -10,32 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-interface LicensingDate {
-  name: string;
-  type: string;
-  approvalDate: string;
-  source: string;
-  lastUpdated: string;
-}
-
-interface ProductProfile {
-  type: string;
-  name: string;
-  composition: string;
-  strainCoverage: string;
-  indication: string;
-  contraindication: string;
-  dosing: string;
-  immunogenicity: string;
-  Efficacy: string;
-  durationOfProtection: string;
-  coAdministration: string;
-  reactogenicity: string;
-  safety: string;
-  vaccinationGoal: string;
-  others: string;
-}
+import { ProductProfile, LicensingDate } from '@/lib/types';
 
 interface LicensedVaccine {
   _id: string;
@@ -562,10 +537,10 @@ export function ManufacturersClient({
                                 </div>
                                 <div className="text-sm text-gray-700">
                                   <a
-                                    href={`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
+                                    href={`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      router.push(`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
+                                      router.push(`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
                                     }}
                                     className="text-blue-600 hover:underline cursor-pointer"
                                   >

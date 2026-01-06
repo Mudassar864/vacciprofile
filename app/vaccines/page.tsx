@@ -95,6 +95,7 @@ async function fetchPathogensData() {
         ? pathogen.vaccines
         : [];
 
+      // Process all vaccines, including those without licensingDates
       vaccinesArray.forEach((vaccine: any, vIndex: number) => {
         const licensingDates = Array.isArray(vaccine.licensingDates)
           ? vaccine.licensingDates
@@ -104,6 +105,9 @@ async function fetchPathogensData() {
         const authorityLinks: string[] = [];
         const seenAuthorities = new Set<string>();
 
+        // Extract authority information from licensingDates if available
+        // If licensingDates is empty, authorityNames and authorityLinks will remain empty
+        // but the vaccine will still be included in the list
         licensingDates.forEach((licensing: any) => {
           if (licensing.name && !seenAuthorities.has(licensing.name)) {
             seenAuthorities.add(licensing.name);
@@ -112,11 +116,12 @@ async function fetchPathogensData() {
           }
         });
 
+        // Always add the vaccine to the list, even if it has no licensingDates
         transformedVaccines.push({
           licensed_vaccine_id: vaccine.id || `${pathogen.id || pathogen.pathogenId}-${vIndex}`,
           pathogen_name: pathogenName,
           vaccine_brand_name: vaccine.name,
-          single_or_combination: vaccine.vaccineType === "single" ? "Single Pathogen Vaccine" : "Combination Vaccine",
+          single_or_combination: vaccine.vaccineType === "single" ? "Single" : "Combination",
           authority_names: authorityNames,
           authority_links: authorityLinks,
           vaccine_link: vaccine.vaccineLink || vaccine.link,

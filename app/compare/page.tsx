@@ -101,7 +101,7 @@ async function fetchPathogensData() {
           licensed_vaccine_id: vaccine.id || `${pathogen.id || pathogen.pathogenId}-${vIndex}`,
           pathogen_name: pathogenName,
           vaccine_brand_name: vaccine.name,
-          single_or_combination: vaccine.vaccineType === "single" ? "Single Pathogen Vaccine" : "Combination Vaccine",
+          single_or_combination: vaccine.vaccineType === "single" ? "Single" : "Combination",
           authority_names: authorityNames,
           authority_links: authorityLinks,
           vaccine_link: vaccine.vaccineLink || vaccine.link,

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { Search, ChevronDown, ChevronUp, Menu, X, ExternalLink, Clock } from 'lucide-react';
 import {
@@ -10,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ProductProfile, LicensingDate } from '@/lib/types';
+import { ProductProfileComparison } from '@/components/vaccines/product-profile-comparison';
 
 export interface Licenser {
   licenserId: number;
@@ -20,34 +23,6 @@ export interface Licenser {
   description: string;
   website: string;
   updatedAt?: string;
-}
-
-interface ProductProfile {
-  type: string;
-  name: string;
-  composition: string;
-  strainCoverage: string;
-  indication: string;
-  contraindication: string;
-  dosing: string;
-  immunogenicity: string;
-  Efficacy: string;
-  durationOfProtection: string;
-  coAdministration: string;
-  reactogenicity: string;
-  safety: string;
-  vaccinationGoal: string;
-  others: string;
-}
-
-interface LicensingDate {
-  id: string;
-  vaccineName: string;
-  name: string;
-  type: string;
-  approvalDate: string;
-  source: string;
-  lastUpdateOnVaccine: string;
 }
 
 export interface Vaccine {
@@ -292,7 +267,6 @@ export function AuthoritiesClient({
                   size={20}
                 />
               </button>
-
               {showOtherCountries && otherCountries.map((country) => {
                 const licensersInCountry = filteredOthers.filter(
                   (licenser) => (licenser.country || 'Unknown') === country
@@ -366,9 +340,6 @@ export function AuthoritiesClient({
                     <h1 className="text-2xl sm:text-3xl font-bold text-[#d17728] mb-4">
                       {selectedLicenser.fullName}
                     </h1>
-                    <p className="text-gray-700 leading-relaxed mb-4 text-sm sm:text-base">
-                      {selectedLicenser.description}
-                    </p>
                     {selectedLicenser.website && (
                       <a
                         href={selectedLicenser.website}
@@ -381,16 +352,91 @@ export function AuthoritiesClient({
                         <ExternalLink size={14} className="opacity-70" />
                       </a>
                     )}
-
-                    {selectedLicenser.updatedAt && (
-                      <div className="border-t pt-4 mt-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock size={16} className="text-orange-600" />
-                          <span className="font-semibold text-gray-700">Last Updated:</span>
-                          <span>{new Date(selectedLicenser.updatedAt).toLocaleDateString()}</span>
+                    {selectedLicenser.description && (() => {
+                      // Extract bullets (lines starting with •) and regular text/headings
+                      const lines = selectedLicenser.description.split('\n').map(line => line.trim()).filter(line => line);
+                      const content: Array<{ type: 'heading' | 'bullet' | 'text'; content: string }> = [];
+                      
+                      lines.forEach((line, index) => {
+                        if (line.startsWith('•') || line.startsWith('●') || line.startsWith('▪') || line.startsWith('▸')) {
+                          // Remove bullet character and trim
+                          const bulletText = line.replace(/^[•●▪▸]\s*/, '').trim();
+                          if (bulletText) {
+                            content.push({ type: 'bullet', content: bulletText });
+                          }
+                        } else {
+                          // Check if line contains text in curly braces {} - this is a heading
+                          const curlyBraceMatch = line.match(/\{([^}]+)\}/);
+                          if (curlyBraceMatch) {
+                            // Extract text from curly braces and use as heading
+                            const headingText = curlyBraceMatch[1].trim();
+                            if (headingText) {
+                              content.push({ type: 'heading', content: headingText });
+                            }
+                            // If there's text after the braces, add it as regular text
+                            const textAfterBraces = line.replace(/\{[^}]+\}/, '').trim();
+                            if (textAfterBraces) {
+                              content.push({ type: 'text', content: textAfterBraces });
+                            }
+                          } else {
+                            // Check if it's a heading based on other criteria:
+                            // - Short line (less than 60 chars) and followed by bullets
+                            // - Or all caps and short
+                            // - Or has 3 or fewer words and is followed by a line break (next line is bullet or heading)
+                            const wordCount = line.split(/\s+/).filter(word => word.length > 0).length;
+                            const isShort = line.length < 60;
+                            const isAllCaps = line === line.toUpperCase() && line.length > 3 && /[A-Z]/.test(line);
+                            const hasFewWords = wordCount <= 3;
+                            const nextLineIsBullet = index < lines.length - 1 && 
+                              (lines[index + 1].startsWith('•') || lines[index + 1].startsWith('●') || 
+                               lines[index + 1].startsWith('▪') || lines[index + 1].startsWith('▸'));
+                            const nextLineExists = index < lines.length - 1;
+                            const nextLineIsShort = nextLineExists && lines[index + 1].split(/\s+/).filter(word => word.length > 0).length <= 3;
+                            
+                            // If it's short and followed by bullets, or all caps, or has 3 or fewer words and followed by content, treat as heading
+                            if ((isShort && nextLineIsBullet) || (isAllCaps && isShort) || (hasFewWords && (nextLineIsBullet || nextLineIsShort))) {
+                              content.push({ type: 'heading', content: line });
+                            } else {
+                              content.push({ type: 'text', content: line });
+                            }
+                          }
+                        }
+                      });
+                      
+                      return (
+                        <div className="mt-4">
+                          {content.map((item, i) => {
+                            if (item.type === 'heading') {
+                              return (
+                                <h3 key={i} className="text-lg font-semibold text-[#d17728] mt-6 mb-3 first:mt-0">
+                                  {item.content}
+                                </h3>
+                              );
+                            } else if (item.type === 'bullet') {
+                              return (
+                                <div key={i} className="flex items-start gap-3 mb-3">
+                                  <span className="text-[#d17728] mt-1.5 flex-shrink-0">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                  </span>
+                                  <span className="text-gray-700 leading-relaxed text-sm sm:text-base flex-1">
+                                    {item.content}
+                                  </span>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <p key={i} className="text-gray-700 leading-relaxed mb-3 text-sm sm:text-base">
+                                  {item.content}
+                                </p>
+                              );
+                            }
+                          })}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
+                    
                   </div>
                 )}
               </div>
@@ -437,26 +483,20 @@ export function AuthoritiesClient({
                                     ? 'bg-blue-100 text-blue-800' 
                                     : 'bg-purple-100 text-purple-800'
                                 }`}>
-                                  {vaccine.vaccineType === 'single' 
-                                    ? 'Single Pathogen Vaccine' 
-                                    : 'Combination Vaccine'}
+                                  {vaccine.vaccineType === "single" ? "Single" : "Combination"}
                                 </span>
                               </td>
                               <td className="px-4 sm:px-6 py-3 sm:py-4">
                                 {vaccine.pathogens && vaccine.pathogens.length > 0 ? (
                                   <div className="space-y-1">
                                     {vaccine.pathogens.map((pathogen, idx) => (
-                                      <a 
+                                      <Link 
                                         key={idx} 
                                         href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          router.push(`/vaccines?pathogen=${encodeURIComponent(pathogen)}`);
-                                        }}
                                         className="text-blue-600 hover:underline block text-sm cursor-pointer"
                                       >
                                         {pathogen}
-                                      </a>
+                                      </Link>
                                     ))}
                                   </div>
                                 ) : (
@@ -467,35 +507,20 @@ export function AuthoritiesClient({
                                 {vaccine.manufacturers && vaccine.manufacturers.length > 0 ? (
                                   <div className="space-y-1">
                                     {vaccine.manufacturers.map((manufacturer, idx) => (
-                                      <a 
+                                      <Link 
                                         key={idx} 
                                         href={`/manufacturers?manufacturer=${encodeURIComponent(manufacturer)}`}
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          router.push(`/manufacturers?manufacturer=${encodeURIComponent(manufacturer)}`);
-                                        }}
                                         className="text-blue-600 hover:underline block text-sm cursor-pointer"
                                       >
                                         {manufacturer}
-                                      </a>
+                                      </Link>
                                     ))}
                                   </div>
                                 ) : (
                                   <span className="text-gray-400 text-sm">-</span>
                                 )}
                               </td>
-                              <td className="px-4 sm:px-6 py-3 sm:py-4">
-                                <div className="text-gray-600 text-xs flex items-center gap-1">
-                                  {vaccine.licensingDates && vaccine.licensingDates.length > 0 && vaccine.licensingDates[0]?.lastUpdateOnVaccine ? (
-                                    <>
-                                      <Clock size={12} className="opacity-70" />
-                                      <span>{new Date(vaccine.licensingDates[0].lastUpdateOnVaccine).toLocaleDateString()}</span>
-                                    </>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </div>
-                              </td>
+                              
                             </tr>
                           ))
                         ) : (
@@ -533,9 +558,7 @@ export function AuthoritiesClient({
                                     ? 'bg-blue-100 text-blue-800' 
                                     : 'bg-purple-100 text-purple-800'
                                 }`}>
-                                  {vaccine.vaccineType === 'single' 
-                                    ? 'Single Pathogen Vaccine' 
-                                    : 'Combination Vaccine'}
+                                  {vaccine.vaccineType === "single" ? "Single" : "Combination"}
                                 </span>
                               </div>
                             </div>
@@ -545,17 +568,13 @@ export function AuthoritiesClient({
                                 {vaccine.pathogens && vaccine.pathogens.length > 0 ? (
                                   <div className="space-y-1">
                                     {vaccine.pathogens.map((pathogen, idx) => (
-                                      <a 
+                                      <Link 
                                         key={idx} 
                                         href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          router.push(`/vaccines?pathogen=${encodeURIComponent(pathogen)}`);
-                                        }}
                                         className="text-blue-600 hover:underline block cursor-pointer"
                                       >
                                         {pathogen}
-                                      </a>
+                                      </Link>
                                     ))}
                                   </div>
                                 ) : (
@@ -563,30 +582,26 @@ export function AuthoritiesClient({
                                 )}
                               </div>
                             </div>
-                            <div>
-                              <span className="text-xs font-semibold text-gray-500 uppercase">Manufacturer</span>
-                              <div className="mt-1">
-                                {vaccine.manufacturers && vaccine.manufacturers.length > 0 ? (
-                                  <div className="space-y-1">
-                                    {vaccine.manufacturers.map((manufacturer, idx) => (
-                                      <a 
-                                        key={idx} 
-                                        href={`/manufacturers?manufacturer=${encodeURIComponent(manufacturer)}`}
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          router.push(`/manufacturers?manufacturer=${encodeURIComponent(manufacturer)}`);
-                                        }}
-                                        className="text-blue-600 hover:underline block cursor-pointer"
-                                      >
-                                        {manufacturer}
-                                      </a>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
+                              <div>
+                                <span className="text-xs font-semibold text-gray-500 uppercase">Manufacturer</span>
+                                <div className="mt-1">
+                                  {vaccine.manufacturers && vaccine.manufacturers.length > 0 ? (
+                                    <div className="space-y-1">
+                                      {vaccine.manufacturers.map((manufacturer, idx) => (
+                                        <Link 
+                                          key={idx} 
+                                          href={`/manufacturers?manufacturer=${encodeURIComponent(manufacturer)}`}
+                                          className="text-blue-600 hover:underline block cursor-pointer"
+                                        >
+                                          {manufacturer}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
                           </div>
                         ))
                       ) : (
@@ -625,7 +640,7 @@ export function AuthoritiesClient({
                   <div>
                     <span className="font-semibold text-gray-700">Type:</span>
                     <span className="ml-2 text-gray-600 break-words">
-                      {selectedVaccine.vaccineType === 'single' ? 'Single Pathogen Vaccine' : 'Combination Vaccine'}
+                      {selectedVaccine.vaccineType === "single" ? "Single" : "Combination"}
                     </span>
                   </div>
                 </div>
@@ -636,142 +651,10 @@ export function AuthoritiesClient({
                     <p className="mt-2 text-gray-600">Loading product profiles...</p>
                   </div>
                 ) : selectedVaccine.productProfiles && Array.isArray(selectedVaccine.productProfiles) && selectedVaccine.productProfiles.length > 0 ? (
-                  <div className="space-y-4 sm:space-y-6">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 border-b pb-2">
-                      Product Profiles
-                    </h3>
-                    <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
-                      <div className="flex gap-3 sm:gap-4 min-w-max pb-4">
-                        {[...selectedVaccine.productProfiles].sort((a, b) => {
-                          const aType = (a.type || '').toUpperCase();
-                          const bType = (b.type || '').toUpperCase();
-                          const aHasEMA = aType.includes('EMA');
-                          const aHasWHO = aType.includes('WHO');
-                          const aHasFDA = aType.includes('FDA');
-                          const bHasEMA = bType.includes('EMA');
-                          const bHasWHO = bType.includes('WHO');
-                          const bHasFDA = bType.includes('FDA');
-                          const getPriority = (hasEMA: boolean, hasWHO: boolean, hasFDA: boolean) => {
-                            if (hasEMA) return 0;
-                            if (hasWHO) return 1;
-                            if (hasFDA) return 2;
-                            return 3;
-                          };
-                          const aPriority = getPriority(aHasEMA, aHasWHO, aHasFDA);
-                          const bPriority = getPriority(bHasEMA, bHasWHO, bHasFDA);
-                          if (aPriority !== bPriority) {
-                            return aPriority - bPriority;
-                          }
-                          return 0;
-                        }).map((profile, index) => (
-                          <div 
-                            key={index} 
-                            className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] border border-gray-200 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3 bg-white shadow-sm"
-                          >
-                            <div className="flex flex-col gap-2 mb-2 sm:mb-3">
-                              <span className="px-2 sm:px-3 py-1 bg-[#d17728] text-white rounded font-semibold text-xs sm:text-sm w-fit">
-                                {profile.type}
-                              </span>
-                              <h4 className="font-semibold text-gray-800 text-xs sm:text-sm break-words">
-                                {profile.name}
-                              </h4>
-                            </div>
-                            
-                            <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Composition:</span>
-                                <p className="text-gray-600 break-words">{profile.composition || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Strain Coverage:</span>
-                                <p className="text-gray-600 break-words">{profile.strainCoverage || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Indication:</span>
-                                <p className="text-gray-600 break-words">{profile.indication || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Contraindication:</span>
-                                <p className="text-gray-600 break-words">{profile.contraindication || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Dosing:</span>
-                                <p className="text-gray-600 break-words">{profile.dosing || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Immunogenicity:</span>
-                                <p className="text-gray-600 break-words">{profile.immunogenicity || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Efficacy:</span>
-                                <p className="text-gray-600 break-words">{profile.Efficacy || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Duration of Protection:</span>
-                                <p className="text-gray-600 break-words">{profile.durationOfProtection || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Co-Administration:</span>
-                                <p className="text-gray-600 break-words">{profile.coAdministration || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Reactogenicity:</span>
-                                <p className="text-gray-600 break-words">{profile.reactogenicity || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Safety:</span>
-                                <p className="text-gray-600 break-words">{profile.safety || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Vaccination Goal:</span>
-                                <p className="text-gray-600 break-words">{profile.vaccinationGoal || "-"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700 block mb-1">Others:</span>
-                                <p className="text-gray-600 break-words">{profile.others || "-"}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Licensing Data Section */}
-                    {selectedVaccine.licensingDates && selectedVaccine.licensingDates.length > 0 && (
-                      <div className="mt-6 pt-4 border-t-2 border-gray-300">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">
-                          Licensing Data
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                          {selectedVaccine.licensingDates.map((license: LicensingDate, idx: number) => (
-                            <div key={idx} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 space-y-2 text-xs sm:text-sm">
-                              <div>
-                                <span className="font-semibold text-gray-700">Authority:</span>
-                                <span className="ml-2 text-gray-600 break-words">{license.name || "-"}</span>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-gray-700">Approval Date:</span>
-                                <span className="ml-2 text-gray-600 break-words">{license.approvalDate || "-"}</span>
-                              </div>
-                              {license.source && (
-                                <div>
-                                  <span className="font-semibold text-gray-700">Source:</span>
-                                  <a
-                                    href={license.source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="ml-2 text-blue-600 underline underline-offset-4 hover:underline break-all"
-                                  >
-                                    View Source
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <ProductProfileComparison
+                    profiles={selectedVaccine.productProfiles}
+                    licensingDates={selectedVaccine.licensingDates || []}
+                  />
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     No product profile information available for this vaccine.
