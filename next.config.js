@@ -4,21 +4,49 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
-  // Optimize bundle size
+  
+  // ADD THESE LINES FOR REAL-TIME UPDATES
+  experimental: {
+    isrMemoryCacheSize: 0, // Disable ISR memory cache
+  },
+  // Disable static optimization for dynamic content
+  trailingSlash: false,
+  // Add environment variables
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  },
+  // ADD CACHE HEADERS
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+    ];
+  },
+  
+  // Optimize bundle sizes
   swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
     } : false,
   },
+  
   // Enable compression
   compress: true,
+  
   // Optimize production builds
   productionBrowserSourceMaps: false,
-  // Optimize webpack for smaller bundles
+  
+  // Your existing webpack config...
   webpack: (config, { isServer, dev }) => {
     if (!isServer && !dev) {
-      // Optimize for production
+      // Your existing optimization config
       config.optimization = {
         ...config.optimization,
         moduleIds: 'deterministic',
@@ -28,14 +56,12 @@ const nextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Separate vendor chunks
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /node_modules/,
               priority: 20,
             },
-            // Separate common chunks
             common: {
               name: 'common',
               minChunks: 2,
