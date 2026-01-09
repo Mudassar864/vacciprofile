@@ -165,5 +165,5 @@ For questions or issues, please [create an issue](link-to-issues) or contact the
 
 ---
 
-Built with ❤️ using Next.js and TypeScript
+Built with ❤️ using Next.js and TypeScript.
 
