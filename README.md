@@ -22,7 +22,7 @@ VacciPROFILE is a Next.js-based web application designed to help users explore a
 - 📱 Mobile-friendly design
 - ⚡ Fast performance with Next.js App Router and tag-based caching
 - 🔄 On-demand cache revalidation for immediate UI updates
-- 🔐 Type-safe development with TypeScript
+-  Type-safe development with TypeScript
 
 ## Tech Stack
 
