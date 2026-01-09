@@ -1,6 +1,6 @@
 # VacciPROFILE
 
-A comprehensive vaccine information database and web application providing detailed information about licensed vaccines, vaccine candidates, manufacturers, licensing authorities, and National Immunization Technical Advisory Groups (NITAGs).
+A comprehensive vaccine information database and web application providing detailed information about licensed vaccines, vaccine candidates, manufacturers, licensing authorities, and National Immunization Technical Advisory Groups (NITAGs)..
 
 ## Overview
 
