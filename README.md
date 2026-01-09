@@ -13,7 +13,7 @@ VacciPROFILE is a Next.js-based web application designed to help users explore a
 - **NITAGs**: National Immunization Technical Advisory Groups organized by country
 - **Comparison Tool**: Compare vaccines data and specifications based on pathogens
 
-## Features
+## Features.
 
 - 🎨 Modern, responsive UI built with Tailwind CSS and shadcn/ui components
 - 🔍 Advanced search and filtering capabilities
