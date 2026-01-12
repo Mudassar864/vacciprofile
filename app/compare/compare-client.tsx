@@ -9,6 +9,7 @@ import { SidebarWithSearch } from '@/components/common/sidebar-with-search';
 import { ProductProfileComparison } from '@/components/vaccines/product-profile-comparison';
 import { VaccineComparisonTable } from '@/components/vaccines/vaccine-comparison-table';
 import { Vaccine, ProductProfile } from '@/lib/types';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface VaccineWithProfiles extends Vaccine {
   productProfiles?: ProductProfile[];
@@ -278,16 +279,19 @@ export function CompareClient({
                 : 'text-gray-700 hover:bg-[#d17728]/10 hover:text-[#d17728] hover:font-medium active:scale-[0.98]'
             }`
           }
-          renderItem={(pathogen, isSelected) => (
-            <>
-              <span className={`transition-all duration-200 ${isSelected ? 'font-semibold' : 'font-normal'}`}>
-                {pathogen}
-              </span>
-              {isSelected && (
-                <span className="ml-2 inline-block w-2 h-2 bg-white rounded-full animate-pulse" />
-              )}
-            </>
-          )}
+          renderItem={(pathogen, isSelected) => {
+            const { displayName, className } = formatPathogenName(pathogen);
+            return (
+              <>
+                <span className={`transition-all duration-200 ${isSelected ? 'font-semibold' : 'font-normal'} ${className || ''}`}>
+                  {displayName}
+                </span>
+                {isSelected && (
+                  <span className="ml-2 inline-block w-2 h-2 bg-white rounded-full animate-pulse" />
+                )}
+              </>
+            );
+          }}
         />
 
         <main className="flex-1 p-4 sm:p-6 w-full lg:w-auto">

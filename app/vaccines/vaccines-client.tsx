@@ -8,6 +8,7 @@ import { SidebarWithSearch } from "@/components/common/sidebar-with-search";
 import { ProductProfileDialog } from "@/components/vaccines/product-profile-dialog";
 import { ProductProfileComparison } from "@/components/vaccines/product-profile-comparison";
 import { Vaccine, PathogenData } from "@/lib/types";
+import { formatPathogenName } from "@/lib/pathogen-formatting";
 
 interface VaccinesClientProps {
   initialVaccines: Vaccine[];
