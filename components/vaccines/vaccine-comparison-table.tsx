@@ -2,6 +2,7 @@
 
 import { Vaccine } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface VaccineComparisonTableProps {
   vaccines: Vaccine[];
@@ -44,14 +45,17 @@ export function VaccineComparisonTable({ vaccines }: VaccineComparisonTableProps
               <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm text-gray-900 sticky left-0 bg-white z-10">
                 Pathogen
               </td>
-              {vaccines.map((vaccine) => (
-                <td
-                  key={vaccine.licensed_vaccine_id}
-                  className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-700"
-                >
-                  {vaccine.pathogen_name || '-'}
-                </td>
-              ))}
+              {vaccines.map((vaccine) => {
+                const { displayName, className } = formatPathogenName(vaccine.pathogen_name || '');
+                return (
+                  <td
+                    key={vaccine.licensed_vaccine_id}
+                    className={`px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-700 ${className || ''}`}
+                  >
+                    {displayName || '-'}
+                  </td>
+                );
+              })}
             </tr>
             <tr>
               <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm text-gray-900 sticky left-0 bg-white z-10">

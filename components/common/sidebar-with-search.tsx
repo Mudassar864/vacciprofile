@@ -2,6 +2,7 @@
 
 import { Search, X } from 'lucide-react';
 import { ReactNode } from 'react';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface SidebarWithSearchProps {
   title: string;
@@ -38,9 +39,14 @@ export function SidebarWithSearch({
   itemClassName,
   hintText,
 }: SidebarWithSearchProps) {
-  const defaultRenderItem = (item: string, isSelected: boolean) => (
-    <span className={isSelected ? '' : 'italic'}>{item}</span>
-  );
+  const defaultRenderItem = (item: string, isSelected: boolean) => {
+    // Apply pathogen formatting if this is a pathogen list
+    const { displayName, className } = formatPathogenName(item);
+    
+    return (
+      <span className={className || undefined}>{displayName}</span>
+    );
+  };
 
   const render = renderItem || defaultRenderItem;
   const defaultItemClassName = (isSelected: boolean) =>

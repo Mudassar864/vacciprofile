@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { ProductProfile, LicensingDate } from '@/lib/types';
 import { ProductProfileComparison } from '@/components/vaccines/product-profile-comparison';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 export interface Licenser {
   licenserId: number;
@@ -489,15 +490,18 @@ export function AuthoritiesClient({
                               <td className="px-4 sm:px-6 py-3 sm:py-4">
                                 {vaccine.pathogens && vaccine.pathogens.length > 0 ? (
                                   <div className="space-y-1">
-                                    {vaccine.pathogens.map((pathogen, idx) => (
-                                      <Link 
-                                        key={idx} 
-                                        href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
-                                        className="text-blue-600 hover:underline block text-sm cursor-pointer"
-                                      >
-                                        {pathogen}
-                                      </Link>
-                                    ))}
+                                    {vaccine.pathogens.map((pathogen, idx) => {
+                                      const { displayName, className } = formatPathogenName(pathogen);
+                                      return (
+                                        <Link 
+                                          key={idx} 
+                                          href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
+                                          className={`text-blue-600 hover:underline block text-sm cursor-pointer ${className || ''}`}
+                                        >
+                                          {displayName}
+                                        </Link>
+                                      );
+                                    })}
                                   </div>
                                 ) : (
                                   <span className="text-gray-400 text-sm">-</span>
@@ -567,15 +571,18 @@ export function AuthoritiesClient({
                               <div className="mt-1">
                                 {vaccine.pathogens && vaccine.pathogens.length > 0 ? (
                                   <div className="space-y-1">
-                                    {vaccine.pathogens.map((pathogen, idx) => (
-                                      <Link 
-                                        key={idx} 
-                                        href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
-                                        className="text-blue-600 hover:underline block cursor-pointer"
-                                      >
-                                        {pathogen}
-                                      </Link>
-                                    ))}
+                                    {vaccine.pathogens.map((pathogen, idx) => {
+                                      const { displayName, className } = formatPathogenName(pathogen);
+                                      return (
+                                        <Link 
+                                          key={idx} 
+                                          href={`/vaccines?pathogen=${encodeURIComponent(pathogen)}`}
+                                          className={`text-blue-600 hover:underline block cursor-pointer ${className || ''}`}
+                                        >
+                                          {displayName}
+                                        </Link>
+                                      );
+                                    })}
                                   </div>
                                 ) : (
                                   <span className="text-gray-400">-</span>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ChevronDown, Menu, X, ExternalLink, Clock } from 'lucide-react';
 import { AlphabetNav } from '@/components/alphabet-nav';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface Candidate {
   _id: string;
@@ -181,7 +182,12 @@ export function CandidatesClient({
                         : 'text-gray-700'
                     }`}
                   >
-                    <span className={selectedPathogen === pathogen ? '' : 'italic'}>{pathogen}</span>
+                    {(() => {
+                      const { displayName, className } = formatPathogenName(pathogen);
+                      return (
+                        <span className={className || undefined}>{displayName}</span>
+                      );
+                    })()}
                   </button>
                 ))}
               </>

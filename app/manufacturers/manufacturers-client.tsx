@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ProductProfile, LicensingDate } from '@/lib/types';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface LicensedVaccine {
   _id: string;
@@ -536,16 +537,21 @@ export function ManufacturersClient({
                                   )}
                                 </div>
                                 <div className="text-sm text-gray-700">
-                                  <a
-                                    href={`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      router.push(`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
-                                    }}
-                                    className="text-blue-600 hover:underline cursor-pointer"
-                                  >
-                                    {candidate.pathogenName}
-                                  </a>
+                                  {(() => {
+                                    const { displayName, className } = formatPathogenName(candidate.pathogenName);
+                                    return (
+                                      <a
+                                        href={`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          router.push(`/candidates?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
+                                        }}
+                                        className={`text-blue-600 hover:underline cursor-pointer ${className || ''}`}
+                                      >
+                                        {displayName}
+                                      </a>
+                                    );
+                                  })()}
                                 </div>
                                 <div className="text-center bg-blue-50/30">{getPhaseLabel(phases.phase_i, candidate.companyUrl)}</div>
                                 <div className="text-center bg-green-50/30">{getPhaseLabel(phases.phase_ii, candidate.companyUrl)}</div>
@@ -594,16 +600,21 @@ export function ManufacturersClient({
                                 <div>
                                   <span className="text-xs font-semibold text-gray-500 uppercase">Pathogen</span>
                                   <div className="mt-1 text-sm text-gray-700">
-                                    <a
-                                      href={`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        router.push(`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
-                                      }}
-                                      className="text-blue-600 hover:underline cursor-pointer"
-                                    >
-                                      {candidate.pathogenName}
-                                    </a>
+                                    {(() => {
+                                      const { displayName, className } = formatPathogenName(candidate.pathogenName);
+                                      return (
+                                        <a
+                                          href={`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            router.push(`/vaccines?pathogen=${encodeURIComponent(candidate.pathogenName)}`);
+                                          }}
+                                          className={`text-blue-600 hover:underline cursor-pointer ${className || ''}`}
+                                        >
+                                          {displayName}
+                                        </a>
+                                      );
+                                    })()}
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
