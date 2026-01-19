@@ -16,6 +16,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'VacciProfile - Comprehensive Vaccine Information Database',
   description: 'Access detailed information about licensed vaccines, vaccine candidates, manufacturers, and regulatory authorities.',
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'none',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default async function RootLayout({
