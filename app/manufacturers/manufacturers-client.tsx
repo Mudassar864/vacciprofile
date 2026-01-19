@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { ProductProfile, LicensingDate } from '@/lib/types';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
+import { formatAuthorityName } from '@/lib/authority-formatting';
 
 interface LicensedVaccine {
   _id: string;
@@ -457,7 +458,7 @@ export function ManufacturersClient({
                                         rel="noopener noreferrer"
                                         className="inline-block px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs hover:bg-blue-200 transition-colors"
                                       >
-                                        {license.name}: {license.approvalDate}
+                                        {formatAuthorityName(license.name)}: {license.approvalDate}
                                       </a>
                                     ))}
                                   </div>
@@ -804,7 +805,7 @@ export function ManufacturersClient({
                             <div key={idx} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 space-y-2 text-xs sm:text-sm">
                               <div>
                                 <span className="font-semibold text-gray-700">Authority:</span>
-                                <span className="ml-2 text-gray-600 break-words">{license.name || "-"}</span>
+                                <span className="ml-2 text-gray-600 break-words">{formatAuthorityName(license.name || "-")}</span>
                               </div>
                               <div>
                                 <span className="font-semibold text-gray-700">Approval Date:</span>

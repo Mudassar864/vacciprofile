@@ -9,6 +9,7 @@ import { ProductProfileDialog } from "@/components/vaccines/product-profile-dial
 import { ProductProfileComparison } from "@/components/vaccines/product-profile-comparison";
 import { Vaccine, PathogenData } from "@/lib/types";
 import { formatPathogenName } from "@/lib/pathogen-formatting";
+import { formatAuthorityName } from "@/lib/authority-formatting";
 
 interface VaccinesClientProps {
   initialVaccines: Vaccine[];
@@ -215,27 +216,23 @@ export function VaccinesClient({
                               {vaccine.authority_names && vaccine.authority_names.length > 0 ? (
                                 Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
                                   const authorityIndex = vaccine.authority_names.indexOf(authority);
-                                  const link = vaccine.authority_links[authorityIndex] || "";
+                                  const link = vaccine.authority_links[authorityIndex] != "Not Available" ? vaccine.authority_links[authorityIndex] : "#";
+                                  const formattedAuthority = formatAuthorityName(authority);
+                                  const isLinkAvailable = link !== "#";
 
                                   return (
                                     <span key={idx}>
                                       {idx > 0 && ", "}
-                                      {link ? (
-                                        <a
-                                          href={link}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                          title={`Visit ${authority} website (opens in new tab)`}
-                                        >
-                                          <span>{authority}</span>
-                                          <ExternalLink size={12} className="opacity-70" />
-                                        </a>
-                                      ) : (
-                                        <span className="text-gray-700">
-                                          {authority}
-                                        </span>
-                                      )}
+                                      <a
+                                        href={link}
+                                        target={isLinkAvailable ? "_blank" : undefined}
+                                        rel={isLinkAvailable ? "noopener noreferrer" : undefined}
+                                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                        title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No Website link available for this"}
+                                      >
+                                        <span>{formattedAuthority}</span>
+                                        {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
+                                      </a>
                                     </span>
                                   );
                                 })
@@ -281,27 +278,23 @@ export function VaccinesClient({
                                 {vaccine.authority_names && vaccine.authority_names.length > 0 ? (
                                   Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
                                     const authorityIndex = vaccine.authority_names.indexOf(authority);
-                                    const link = vaccine.authority_links[authorityIndex] || "";
+                                    const link = vaccine.authority_links[authorityIndex] != "Not Available" ? vaccine.authority_links[authorityIndex] : "#";
+                                    const formattedAuthority = formatAuthorityName(authority);
+                                    const isLinkAvailable = link !== "#";
 
                                     return (
                                       <span key={idx}>
                                         {idx > 0 && ", "}
-                                        {link ? (
-                                          <a
-                                            href={link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                            title={`Visit ${authority} website (opens in new tab)`}
-                                          >
-                                            <span>{authority}</span>
-                                            <ExternalLink size={12} className="opacity-70" />
-                                          </a>
-                                        ) : (
-                                          <span className="text-gray-700">
-                                            {authority}
-                                          </span>
-                                        )}
+                                        <a
+                                          href={link}
+                                          target={isLinkAvailable ? "_blank" : undefined}
+                                          rel={isLinkAvailable ? "noopener noreferrer" : undefined}
+                                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                          title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No link available for this"}
+                                        >
+                                          <span>{formattedAuthority}</span>
+                                          {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
+                                        </a>
                                       </span>
                                     );
                                   })

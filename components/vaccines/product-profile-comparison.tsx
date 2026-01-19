@@ -2,6 +2,7 @@
 
 import { ProductProfile, LicensingDate } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
+import { formatAuthorityName } from '@/lib/authority-formatting';
 
 interface ProductProfileWithVaccine extends ProductProfile {
   vaccineName?: string;
@@ -167,7 +168,7 @@ export function ProductProfileComparison({
                             <div>
                               <span className="font-semibold text-gray-700">Authority:</span>
                               <span className="ml-1 text-gray-600 break-words">
-                                {license.name || '-'}
+                                {formatAuthorityName(license.name || '-')}
                               </span>
                             </div>
                             <div>

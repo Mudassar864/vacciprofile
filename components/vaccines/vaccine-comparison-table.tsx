@@ -3,6 +3,7 @@
 import { Vaccine } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
+import { formatAuthorityName } from '@/lib/authority-formatting';
 
 interface VaccineComparisonTableProps {
   vaccines: Vaccine[];
@@ -92,23 +93,22 @@ export function VaccineComparisonTable({ vaccines }: VaccineComparisonTableProps
                   <div className="flex flex-col gap-1">
                     {vaccine.authority_names.length > 0 ? (
                       vaccine.authority_names.map((authority, idx) => {
-                        const link = vaccine.authority_links[idx] || '';
+                        const rawLink = vaccine.authority_links[idx] || '#';
+                        const link = rawLink !== "Not Available" ? rawLink : "#";
+                        const formattedAuthority = formatAuthorityName(authority);
+                        const isLinkAvailable = link !== '#';
                         return (
                           <span key={idx} className="text-xs sm:text-sm">
-                            {link ? (
-                              <a
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline flex items-center gap-1"
-                                title={`Visit ${authority} website (opens in new tab)`}
-                              >
-                                <span>{authority}</span>
-                                <ExternalLink size={12} className="opacity-70" />
-                              </a>
-                            ) : (
-                              <span className="text-gray-700">{authority}</span>
-                            )}
+                            <a
+                              href={link}
+                              target={isLinkAvailable ? '_blank' : undefined}
+                              rel={isLinkAvailable ? 'noopener noreferrer' : undefined}
+                              className="text-blue-600 hover:underline flex items-center gap-1"
+                              title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No link available for this"}
+                            >
+                              <span>{formattedAuthority}</span>
+                              {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
+                            </a>
                           </span>
                         );
                       })
