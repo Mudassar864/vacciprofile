@@ -60,13 +60,13 @@ export function NITAGsClient({
       <div className="flex relative">
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] lg:hidden transition-opacity duration-300"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         <aside
-          className={`fixed lg:sticky top-0 left-0 z-50 w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 h-screen overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none ${
+          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0`}
         >

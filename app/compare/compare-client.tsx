@@ -10,6 +10,7 @@ import { ProductProfileComparison } from '@/components/vaccines/product-profile-
 import { VaccineComparisonTable } from '@/components/vaccines/vaccine-comparison-table';
 import { Vaccine, ProductProfile } from '@/lib/types';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
+import { formatAuthorityName } from '@/lib/authority-formatting';
 
 interface VaccineWithProfiles extends Vaccine {
   productProfiles?: ProductProfile[];
@@ -461,27 +462,43 @@ export function CompareClient({
                                 <td className="px-4 py-3">
                                   <div className="flex flex-wrap gap-2">
                                     {vaccine.authority_names.length > 0 ? (
-                                      vaccine.authority_names.map((authority, idx) => {
-                                        const link = vaccine.authority_links[idx] || '';
-                                        return (
-                                          <span key={idx} className="inline-flex items-center gap-1">
-                                            {link ? (
-                                              <a
-                                                href={link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:underline text-xs flex items-center gap-1"
-                                                title={`Visit ${authority} website (opens in new tab)`}
-                                              >
-                                                <span>{authority}</span>
-                                                <ExternalLink size={12} className="opacity-70" />
-                                              </a>
-                                            ) : (
-                                              <span className="text-gray-700 text-xs">{authority}</span>
-                                            )}
-                                          </span>
-                                        );
-                                      })
+                                      vaccine.authority_names
+                                        .map((authority, idx) => ({ authority, idx }))
+                                        .filter(({ authority, idx }) => {
+                                          const rawLink = vaccine.authority_links[idx];
+                                          const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                          // Filter out Austria authorities without website link
+                                          const isAustria = authority.toLowerCase().includes('austria');
+                                          return !(isAustria && !link);
+                                        })
+                                        .map(({ authority, idx }) => {
+                                          const rawLink = vaccine.authority_links[idx];
+                                          const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                          const formattedAuthority = formatAuthorityName(authority);
+                                          return (
+                                            <span key={idx} className="inline-flex items-center gap-1">
+                                              {link ? (
+                                                <a
+                                                  href={link}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:underline text-xs flex items-center gap-1"
+                                                  title={`Visit ${formattedAuthority} website (opens in new tab)`}
+                                                >
+                                                  <span>{formattedAuthority}</span>
+                                                  <ExternalLink size={12} className="opacity-70" />
+                                                </a>
+                                              ) : (
+                                                <span 
+                                                  className="text-gray-700 text-xs flex items-center gap-1 cursor-help"
+                                                  title="No website link available for this"
+                                                >
+                                                  {formattedAuthority}
+                                                </span>
+                                              )}
+                                            </span>
+                                          );
+                                        })
                                     ) : (
                                       <span className="text-gray-400 text-xs">-</span>
                                     )}

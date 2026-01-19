@@ -131,11 +131,13 @@ export function AuthoritiesClient({
   const selectedVaccines = selectedLicenser ? (vaccinesByLicenser[selectedLicenser.acronym] || []) : [];
 
   const handleLicenserClick = (licenser: Licenser) => {
+    // Clear any previous selection by explicitly setting the new licenser
     // Update URL immediately using window.history, then update state
     // Use licenser acronym (name) instead of ID
     const url = `/authorities?licenser=${encodeURIComponent(licenser.acronym)}`;
     window.history.pushState({}, '', url);
-    setSelectedLicenser(licenser);
+    // Use a function to ensure state update is immediate and doesn't conflict
+    setSelectedLicenser(() => licenser);
     // Use replace to avoid adding to history stack for query param changes
     router.replace(url);
   };
@@ -198,13 +200,13 @@ export function AuthoritiesClient({
       <div className="flex relative">
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[80] lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         <aside
-          className={`fixed lg:sticky top-0 left-0 z-50 w-80 bg-white border-r border-gray-200 h-screen overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0`}
         >
@@ -273,9 +275,10 @@ export function AuthoritiesClient({
                   (licenser) => (licenser.country || 'Unknown') === country
                 );
                 const firstLicenser = licensersInCountry[0];
-                const isSelected = selectedLicenser && licensersInCountry.some(l => 
-                  l.licenserId === selectedLicenser.licenserId
-                );
+                // Only show country as selected if the selectedLicenser is the firstLicenser of this country
+                // This ensures only one country is selected at a time
+                const isSelected = selectedLicenser && firstLicenser && 
+                  selectedLicenser.licenserId === firstLicenser.licenserId;
                 
                 return (
                   <button
@@ -285,7 +288,8 @@ export function AuthoritiesClient({
                         // Use country name in URL when clicking on country
                         const url = `/authorities?country=${encodeURIComponent(country)}`;
                         window.history.pushState({}, '', url);
-                        setSelectedLicenser(firstLicenser);
+                        // Use function form to ensure state update is immediate
+                        setSelectedLicenser(() => firstLicenser);
                         router.replace(url);
                         setSidebarOpen(false);
                       }

@@ -37,7 +37,7 @@ export function Navigation() {
   }, [isOpen]);
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-[50]">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-[100]">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between">
         {/* Mobile menu button */}
@@ -78,10 +78,10 @@ export function Navigation() {
         {isOpen && (
           <>
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90] lg:hidden"
               onClick={() => setIsOpen(false)}
             />
-            <div className="lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto">
+            <div className="lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-[95] transform transition-transform duration-300 ease-in-out overflow-y-auto">
               <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold text-lg text-gray-900">Menu</h2>

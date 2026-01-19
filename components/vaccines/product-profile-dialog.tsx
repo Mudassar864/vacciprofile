@@ -2,6 +2,7 @@
 
 import { Vaccine, ProductProfile, LicensingDate } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
+import { formatAuthorityName } from '@/lib/authority-formatting';
 import {
   Dialog,
   DialogContent,
@@ -112,7 +113,7 @@ export function ProductProfileDialog({
                         <div>
                           <span className="font-semibold text-gray-700">Authority:</span>
                           <span className="ml-2 text-gray-600 break-words">
-                            {license.name || '-'}
+                            {formatAuthorityName(license.name || '-')}
                           </span>
                         </div>
                         <div>
