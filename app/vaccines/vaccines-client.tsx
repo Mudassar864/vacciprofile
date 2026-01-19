@@ -214,28 +214,46 @@ export function VaccinesClient({
 
                             <div>
                               {vaccine.authority_names && vaccine.authority_names.length > 0 ? (
-                                Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
-                                  const authorityIndex = vaccine.authority_names.indexOf(authority);
-                                  const link = vaccine.authority_links[authorityIndex] != "Not Available" ? vaccine.authority_links[authorityIndex] : "#";
-                                  const formattedAuthority = formatAuthorityName(authority);
-                                  const isLinkAvailable = link !== "#";
+                                Array.from(new Set(vaccine.authority_names))
+                                  .filter((authority) => {
+                                    const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                    const rawLink = vaccine.authority_links[authorityIndex];
+                                    const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                    // Filter out Austria authorities without website link
+                                    const isAustria = authority.toLowerCase().includes('austria');
+                                    return !(isAustria && !link);
+                                  })
+                                  .map((authority, idx, filteredArray) => {
+                                    const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                    const rawLink = vaccine.authority_links[authorityIndex];
+                                    const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                    const formattedAuthority = formatAuthorityName(authority);
 
-                                  return (
-                                    <span key={idx}>
-                                      {idx > 0 && ", "}
-                                      <a
-                                        href={link}
-                                        target={isLinkAvailable ? "_blank" : undefined}
-                                        rel={isLinkAvailable ? "noopener noreferrer" : undefined}
-                                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                        title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No Website link available for this"}
-                                      >
-                                        <span>{formattedAuthority}</span>
-                                        {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
-                                      </a>
-                                    </span>
-                                  );
-                                })
+                                    return (
+                                      <span key={idx}>
+                                        {idx > 0 && ", "}
+                                        {link ? (
+                                          <a
+                                            href={link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                            title={`Visit ${formattedAuthority} website (opens in new tab)`}
+                                          >
+                                            <span>{formattedAuthority}</span>
+                                            <ExternalLink size={12} className="opacity-70" />
+                                          </a>
+                                        ) : (
+                                          <span 
+                                            className="text-gray-700 inline-flex items-center gap-1 cursor-help"
+                                            title="No website link available for this"
+                                          >
+                                            {formattedAuthority}
+                                          </span>
+                                        )}
+                                      </span>
+                                    );
+                                  })
                               ) : (
                                 <span className="text-gray-400 italic">No licensing information available</span>
                               )}
@@ -276,28 +294,46 @@ export function VaccinesClient({
                               <span className="text-xs font-semibold text-gray-500 uppercase">Licensing Authority</span>
                               <div className="mt-1">
                                 {vaccine.authority_names && vaccine.authority_names.length > 0 ? (
-                                  Array.from(new Set(vaccine.authority_names)).map((authority, idx) => {
-                                    const authorityIndex = vaccine.authority_names.indexOf(authority);
-                                    const link = vaccine.authority_links[authorityIndex] != "Not Available" ? vaccine.authority_links[authorityIndex] : "#";
-                                    const formattedAuthority = formatAuthorityName(authority);
-                                    const isLinkAvailable = link !== "#";
+                                  Array.from(new Set(vaccine.authority_names))
+                                    .filter((authority) => {
+                                      const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                      const rawLink = vaccine.authority_links[authorityIndex];
+                                      const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                      // Filter out Austria authorities without website link
+                                      const isAustria = authority.toLowerCase().includes('austria');
+                                      return !(isAustria && !link);
+                                    })
+                                    .map((authority, idx) => {
+                                      const authorityIndex = vaccine.authority_names.indexOf(authority);
+                                      const rawLink = vaccine.authority_links[authorityIndex];
+                                      const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                                      const formattedAuthority = formatAuthorityName(authority);
 
-                                    return (
-                                      <span key={idx}>
-                                        {idx > 0 && ", "}
-                                        <a
-                                          href={link}
-                                          target={isLinkAvailable ? "_blank" : undefined}
-                                          rel={isLinkAvailable ? "noopener noreferrer" : undefined}
-                                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                          title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No link available for this"}
-                                        >
-                                          <span>{formattedAuthority}</span>
-                                          {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
-                                        </a>
-                                      </span>
-                                    );
-                                  })
+                                      return (
+                                        <span key={idx}>
+                                          {idx > 0 && ", "}
+                                          {link ? (
+                                            <a
+                                              href={link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                              title={`Visit ${formattedAuthority} website (opens in new tab)`}
+                                            >
+                                              <span>{formattedAuthority}</span>
+                                              <ExternalLink size={12} className="opacity-70" />
+                                            </a>
+                                          ) : (
+                                            <span 
+                                              className="text-gray-700 inline-flex items-center gap-1 cursor-help"
+                                              title="No website link available for this"
+                                            >
+                                              {formattedAuthority}
+                                            </span>
+                                          )}
+                                        </span>
+                                      );
+                                    })
                                 ) : (
                                   <span className="text-gray-400 italic">No licensing information available</span>
                                 )}

@@ -225,13 +225,13 @@ export function ManufacturersClient({
       <div className="flex relative">
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[80] lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         <aside
-          className={`fixed lg:sticky top-0 left-0 z-50 w-80 bg-white border-r border-gray-200 h-screen overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0`}
         >
@@ -450,17 +450,30 @@ export function ManufacturersClient({
                                 <div className="mt-2">
                                   <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Licensing Dates:</p>
                                   <div className="flex flex-wrap gap-2">
-                                    {vaccine.licensingDates.map((license, idx) => (
-                                      <a
-                                        key={idx}
-                                        href={license.source}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-block px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs hover:bg-blue-200 transition-colors"
-                                      >
-                                        {formatAuthorityName(license.name)}: {license.approvalDate}
-                                      </a>
-                                    ))}
+                                    {vaccine.licensingDates.map((license, idx) => {
+                                      const link = license.source && license.source !== "Not Available" ? license.source : null;
+                                      const formattedAuthority = formatAuthorityName(license.name);
+                                      return link ? (
+                                        <a
+                                          key={idx}
+                                          href={link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-block px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                                          title={`Visit ${formattedAuthority} website (opens in new tab)`}
+                                        >
+                                          {formattedAuthority}: {license.approvalDate}
+                                        </a>
+                                      ) : (
+                                        <span
+                                          key={idx}
+                                          className="inline-block px-2 sm:px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs cursor-help"
+                                          title="No website link available for this"
+                                        >
+                                          {formattedAuthority}: {license.approvalDate}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
@@ -811,19 +824,31 @@ export function ManufacturersClient({
                                 <span className="font-semibold text-gray-700">Approval Date:</span>
                                 <span className="ml-2 text-gray-600 break-words">{license.approvalDate || "-"}</span>
                               </div>
-                              {license.source && (
-                                <div>
-                                  <span className="font-semibold text-gray-700">Source:</span>
-                                  <a
-                                    href={license.source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="ml-2 text-blue-600 underline underline-offset-4 hover:underline break-all"
-                                  >
-                                    View Source
-                                  </a>
-                                </div>
-                              )}
+                              <div>
+                                <span className="font-semibold text-gray-700">Source:</span>
+                                {(() => {
+                                  const link = license.source && license.source !== "Not Available" ? license.source : null;
+                                  return link ? (
+                                    <a
+                                      href={link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="ml-2 text-blue-600 underline underline-offset-4 hover:underline break-all inline-flex items-center gap-1"
+                                      title="Visit source website (opens in new tab)"
+                                    >
+                                      View Source
+                                      <ExternalLink size={12} className="opacity-70" />
+                                    </a>
+                                  ) : (
+                                    <span 
+                                      className="ml-2 text-gray-600 break-all inline-flex items-center gap-1 cursor-help"
+                                      title="No website link available for this"
+                                    >
+                                      View Source
+                                    </span>
+                                  );
+                                })()}
+                              </div>
                             </div>
                           ))}
                         </div>

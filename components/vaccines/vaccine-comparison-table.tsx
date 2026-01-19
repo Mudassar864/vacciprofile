@@ -92,26 +92,43 @@ export function VaccineComparisonTable({ vaccines }: VaccineComparisonTableProps
                 <td key={vaccine.licensed_vaccine_id} className="px-4 sm:px-6 py-3 sm:py-4">
                   <div className="flex flex-col gap-1">
                     {vaccine.authority_names.length > 0 ? (
-                      vaccine.authority_names.map((authority, idx) => {
-                        const rawLink = vaccine.authority_links[idx] || '#';
-                        const link = rawLink !== "Not Available" ? rawLink : "#";
-                        const formattedAuthority = formatAuthorityName(authority);
-                        const isLinkAvailable = link !== '#';
-                        return (
-                          <span key={idx} className="text-xs sm:text-sm">
-                            <a
-                              href={link}
-                              target={isLinkAvailable ? '_blank' : undefined}
-                              rel={isLinkAvailable ? 'noopener noreferrer' : undefined}
-                              className="text-blue-600 hover:underline flex items-center gap-1"
-                              title={isLinkAvailable ? `Visit ${formattedAuthority} website (opens in new tab)` : "No link available for this"}
-                            >
-                              <span>{formattedAuthority}</span>
-                              {isLinkAvailable && <ExternalLink size={12} className="opacity-70" />}
-                            </a>
-                          </span>
-                        );
-                      })
+                      vaccine.authority_names
+                        .map((authority, idx) => ({ authority, idx }))
+                        .filter(({ authority, idx }) => {
+                          const rawLink = vaccine.authority_links[idx];
+                          const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                          // Filter out Austria authorities without website link
+                          const isAustria = authority.toLowerCase().includes('austria');
+                          return !(isAustria && !link);
+                        })
+                        .map(({ authority, idx }) => {
+                          const rawLink = vaccine.authority_links[idx];
+                          const link = rawLink && rawLink !== "Not Available" ? rawLink : null;
+                          const formattedAuthority = formatAuthorityName(authority);
+                          return (
+                            <span key={idx} className="text-xs sm:text-sm">
+                              {link ? (
+                                <a
+                                  href={link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline flex items-center gap-1"
+                                  title={`Visit ${formattedAuthority} website (opens in new tab)`}
+                                >
+                                  <span>{formattedAuthority}</span>
+                                  <ExternalLink size={12} className="opacity-70" />
+                                </a>
+                              ) : (
+                                <span 
+                                  className="text-gray-700 flex items-center gap-1 cursor-help"
+                                  title="No website link available for this"
+                                >
+                                  {formattedAuthority}
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })
                     ) : (
                       <span className="text-gray-400 text-xs sm:text-sm">-</span>
                     )}
