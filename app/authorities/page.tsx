@@ -1,7 +1,7 @@
 import { AuthoritiesClient, Licenser, Vaccine } from './authorities-client';
 import { fetchFromAPI } from '@/lib/cache';
 
-const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL|| 'http://localhost:5000';
 
 async function fetchAuthoritiesData() {
   try {

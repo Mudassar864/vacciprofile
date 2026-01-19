@@ -14,7 +14,7 @@ interface Candidate {
 }
 
 async function fetchCandidates() {
-  const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL|| 'http://localhost:5000';
   
   try {
     console.log('Fetching candidates from:', `${API_BASE}/api/manufacturer-candidates`);

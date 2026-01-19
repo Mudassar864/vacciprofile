@@ -2,7 +2,7 @@ import { NITAGsClient, NITAG } from './nitags-client';
 import { fetchFromAPI } from '@/lib/cache';
 
 async function fetchNITAGs(): Promise<NITAG[]> {
-  const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL|| 'http://localhost:5000';
   
   try {
     console.log('Fetching NITAGs from:', `${API_BASE}/api/nitags`);

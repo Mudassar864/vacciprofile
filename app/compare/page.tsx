@@ -41,7 +41,7 @@ interface PathogenData {
 }
 
 async function fetchPathogensData() {
-  const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   
   try {
     const response = await fetchFromAPI(`${API_BASE}/api/pathogens/populated`);

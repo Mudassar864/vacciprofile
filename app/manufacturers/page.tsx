@@ -2,7 +2,7 @@ import { ManufacturersClient, Manufacturer } from './manufacturers-client';
 import { fetchFromAPI } from '@/lib/cache';
 
 async function fetchManufacturers(): Promise<Manufacturer[]> {
-  const API_BASE = process.env.NEXT_PUBLIC_API || 'http://localhost:5000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL|| 'http://localhost:5000';
   
   try {
     console.log('Fetching manufacturers from:', `${API_BASE}/api/manufacturers/populated`);
