@@ -7,7 +7,7 @@ export default function Home() {
       <div className="bg-[#d17728] text-white py-6 sm:py-8 md:py-10">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl">
-            <p className="text-base sm:text-lg md:text-xl text-orange-100">Access detailed information about licensed vaccines, vaccine candidates, manufacturers, and regulatory authorities</p>
+            <p className="text-base sm:text-lg md:text-xl text-orange-100">Access, compare, and analyze detailed information about licensed vaccines, vaccine candidates, manufacturers, and regulatory authorities</p>
           </div>
         </div>
       </div>
