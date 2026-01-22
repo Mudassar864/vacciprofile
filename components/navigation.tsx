@@ -39,8 +39,8 @@ export function Navigation() {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-[100]">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between">
-        {/* Mobile menu button */}
+        <div className="flex items-center justify-between ">
+          {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden p-2 text-gray-700 hover:text-[#d17728] hover:bg-gray-100 rounded-lg transition-colors"
@@ -50,25 +50,25 @@ export function Navigation() {
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-        {/* Desktop menu */}
-          <div className="hidden lg:flex gap-1 xl:gap-2 items-center overflow-x-auto">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
+          {/* Desktop menu */}
+          <div className="hidden lg:flex gap-1 xl:gap-2 items-center overflow-x-auto mx-auto">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className={`py-3 px-3 xl:px-4 font-semibold text-sm xl:text-base transition-colors whitespace-nowrap rounded-t-lg ${
-                  isActive
+                    isActive
                       ? 'bg-[#d17728] text-white shadow-sm'
                       : 'text-gray-700 hover:text-[#d17728] hover:bg-gray-50'
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
 
           {/* Spacer for mobile */}
           <div className="lg:hidden flex-1" />
