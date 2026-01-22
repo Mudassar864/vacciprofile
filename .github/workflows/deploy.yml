@@ -20,7 +20,21 @@ jobs:
         port: 22
         script: |
           cd /var/www/vacciprofile/frontend-new
+          
+          # Configure git to use SSH instead of HTTPS for GitHub
+          git remote set-url origin git@github.com:Global-Health-Press/VacciProfile_New-Version-05.11.2025-.git
+          
+          # Pull latest changes
           git pull origin main
+          
+          # Install dependencies
           npm install
-          npm run build
+          
+          # Build with environment variable
+          NEXT_PUBLIC_API_URL=http://52.0.207.83 npm run build
+          
+          # Restart PM2
           pm2 restart vacciprofile-frontend-new
+          
+          # Check status
+          pm2 status vacciprofile-frontend-new
