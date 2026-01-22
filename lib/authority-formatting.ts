@@ -8,6 +8,7 @@
  * @example
  * formatAuthorityName('Paul-Ehrlich-Institut (Germany)') // Returns 'Germany'
  * formatAuthorityName('Health Canada (Canada)') // Returns 'Canada'
+ * formatAuthorityName('Bulgarian Drug Agency (BDA) (Bulgaria)') // Returns 'Bulgaria'
  * formatAuthorityName('FDA') // Returns 'FDA'
  * formatAuthorityName('EMA') // Returns 'EMA'
  */
@@ -16,12 +17,19 @@ export function formatAuthorityName(authorityName: string): string {
     return authorityName;
   }
 
-  // Check if the authority name contains a country in parentheses
-  const match = authorityName.match(/\(([^)]+)\)/);
+  // Find all matches of text in parentheses
+  const matches = authorityName.match(/\(([^)]+)\)/g);
   
-  if (match && match[1]) {
-    // Extract and return only the country name from parentheses
-    return match[1].trim();
+  if (matches && matches.length > 0) {
+    // If there are multiple sets of parentheses, use the last one (typically the country)
+    // If there's only one, use that one
+    const lastMatch = matches[matches.length - 1];
+    const countryMatch = lastMatch.match(/\(([^)]+)\)/);
+    
+    if (countryMatch && countryMatch[1]) {
+      // Extract and return only the country name from the last parentheses
+      return countryMatch[1].trim();
+    }
   }
 
   // If no parentheses found, return the complete authority name
