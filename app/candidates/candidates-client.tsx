@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, ChevronDown, Menu, X, ExternalLink, Clock } from 'lucide-react';
+import { ChevronDown, Menu, ExternalLink, Clock } from 'lucide-react';
 import { AlphabetNav } from '@/components/alphabet-nav';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
+import { SidebarWithSearch } from '@/components/common/sidebar-with-search';
 
 interface Candidate {
   _id: string;
@@ -129,73 +130,25 @@ export function CandidatesClient({
       <AlphabetNav onLetterClick={setActiveLetter} activeLetter={activeLetter} />
 
       <div className="flex relative">
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-[80] lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <aside
-          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
-        >
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <div className="flex items-center justify-between mb-2 lg:hidden">
-              <h2 className="font-semibold text-gray-800">Pathogens</h2>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 text-gray-600 hover:text-gray-800"
-                aria-label="Close sidebar"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Type to search pathogens..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-                aria-label="Search pathogens"
-              />
-              <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">💡 Click on a pathogen to view vaccine candidates</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {filteredPathogens.length > 0 ? (
-              <>
-                {filteredPathogens.map(pathogen => (
-                  <button
-                    key={pathogen}
-                    onClick={() => {
-                      handlePathogenClick(pathogen);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-[#d17728] hover:text-white transition-colors ${
-                      selectedPathogen === pathogen
-                        ? 'bg-[#d17728] text-white font-semibold'
-                        : 'text-gray-700'
-                    }`}
-                  >
-                    {(() => {
-                      const { displayName, className } = formatPathogenName(pathogen);
-                      return (
-                        <span className={className || undefined}>{displayName}</span>
-                      );
-                    })()}
-                  </button>
-                ))}
-              </>
-            ) : (
-              <div className="p-4 text-center text-gray-500">No pathogens found</div>
-            )}
-          </div>
-        </aside>
+        <SidebarWithSearch
+          title="Pathogens"
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Type to search pathogens..."
+          items={filteredPathogens}
+          selectedItem={selectedPathogen}
+          onItemClick={(pathogen) => {
+            handlePathogenClick(pathogen);
+            setSidebarOpen(false);
+          }}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          hintText="💡 Click on a pathogen to view vaccine candidates"
+          renderItem={(pathogen, isSelected) => {
+            const { displayName, className } = formatPathogenName(pathogen);
+            return <span className={className || undefined}>{displayName}</span>;
+          }}
+        />
 
         <main className="flex-1 p-3 sm:p-6 w-full lg:w-auto">
           <div className="lg:hidden mb-4">

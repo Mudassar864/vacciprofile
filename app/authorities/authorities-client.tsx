@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlphabetNav } from '@/components/alphabet-nav';
-import { Search, ChevronDown, ChevronUp, Menu, X, ExternalLink, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Menu, X, Search, ExternalLink, Clock } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -200,13 +200,13 @@ export function AuthoritiesClient({
       <div className="flex relative">
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-[80] lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[130] lg:hidden transition-opacity duration-300"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         <aside
-          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:sticky top-0 left-0 z-[140] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0`}
         >

@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useRef } from 'react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { Calendar, Globe, ExternalLink, X, Clock } from 'lucide-react';
 
@@ -80,6 +80,7 @@ const normalizeCountryName = (countryName: string): string => {
 };
 
 export default function WorldMap({ nitags, selectedCountry = "", onCountryClick }: WorldMapProps) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({
     show: false,
     name: "",
@@ -141,20 +142,24 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
   };
 
   const handleMouseEnter = (geo: Geography, event: React.MouseEvent<SVGPathElement>) => {
-    setTooltip({
-      show: true,
-      name: geo.properties.name,
-      x: event.clientX,
-      y: event.clientY
-    });
+    if (mapContainerRef.current) {
+      const rect = mapContainerRef.current.getBoundingClientRect();
+      setTooltip({
+        show: true,
+        name: geo.properties.name,
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      });
+    }
   };
 
   const handleMouseMove = (event: React.MouseEvent<SVGPathElement>) => {
-    if (tooltip.show) {
+    if (tooltip.show && mapContainerRef.current) {
+      const rect = mapContainerRef.current.getBoundingClientRect();
       setTooltip(prev => ({
         ...prev,
-        x: event.clientX,
-        y: event.clientY
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
       }));
     }
   };
@@ -245,6 +250,7 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
         </div>
       </div>
       <div
+        ref={mapContainerRef}
         className="flex-1 relative overflow-hidden min-h-0"
         style={{ cursor: isDragging ? 'grabbing' : 'default' }}
         onMouseDown={handleMoveStart}
@@ -317,13 +323,25 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
             </Geographies>
           </ComposableMap>
         </div>
+        {tooltip.show && (
+          <div
+            className="absolute bg-gray-800 text-white px-3 py-2 rounded shadow-lg text-sm pointer-events-none z-50 whitespace-nowrap"
+            style={{
+              left: `${tooltip.x + 5}px`,
+              top: `${tooltip.y + 5}px`,
+              pointerEvents: 'none'
+            }}
+          >
+            {tooltip.name}
+          </div>
+        )}
       </div>
       <Dialog open={!!(selectedCountry && selectedNitag)} onOpenChange={(open) => {
         if (!open && onCountryClick) {
           onCountryClick('');
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0" hideOverlay>
           {selectedNitag && (
             <>
               <DialogHeader className="bg-gradient-to-r from-[#d17728] to-[#e6893a] px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg">
@@ -408,18 +426,6 @@ export default function WorldMap({ nitags, selectedCountry = "", onCountryClick 
           )}
         </DialogContent>
       </Dialog>
-      {tooltip.show && (
-        <div
-          className="fixed bg-gray-800 text-white px-3 py-2 rounded shadow-lg text-sm pointer-events-none z-50 whitespace-nowrap"
-          style={{
-            left: `${tooltip.x + 5}px`,
-            top: `${tooltip.y + 5}px`,
-            pointerEvents: 'none'
-          }}
-        >
-          {tooltip.name}
-        </div>
-      )}
     </div>
   );
 }

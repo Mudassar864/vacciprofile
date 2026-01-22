@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronDown, Building2, Globe, Calendar, Users, DollarSign, Menu, X, ExternalLink, Clock } from 'lucide-react';
+import { ChevronDown, Building2, Globe, Calendar, Users, DollarSign, Menu, ExternalLink, Clock } from 'lucide-react';
 import { AlphabetNav } from '@/components/alphabet-nav';
+import { SidebarWithSearch } from '@/components/common/sidebar-with-search';
 import {
   Dialog,
   DialogContent,
@@ -223,70 +224,27 @@ export function ManufacturersClient({
       <AlphabetNav onLetterClick={setActiveLetter} activeLetter={activeLetter} />
 
       <div className="flex relative">
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-[80] lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <aside
-          className={`fixed lg:sticky top-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
-        >
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <div className="flex items-center justify-between mb-2 lg:hidden">
-              <h2 className="font-semibold text-gray-800">Manufacturers</h2>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 text-gray-600 hover:text-gray-800"
-                aria-label="Close sidebar"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Type to search manufacturers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-                aria-label="Search manufacturers"
-              />
-              <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">💡 Click on a manufacturer to view details</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {filteredManufacturers.length > 0 ? (
-              <>
-                {filteredManufacturers.map(manufacturer => (
-                  <button
-                    key={manufacturer._id}
-                    onClick={() => {
-                      handleManufacturerClick(manufacturer);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 border-b border-gray-200 hover:bg-[#d17728] hover:text-white transition-colors ${
-                      selectedManufacturer?._id === manufacturer._id
-                        ? 'bg-[#d17728] text-white font-semibold'
-                        : 'text-gray-700'
-                    }`}
-                  >
-                    <span className={selectedManufacturer?._id === manufacturer._id ? '' : 'italic'}>
-                      {manufacturer.name}
-                    </span>
-                  </button>
-                ))}
-              </>
-            ) : (
-              <div className="p-4 text-center text-gray-500">No manufacturers found</div>
-            )}
-          </div>
-        </aside>
+        <SidebarWithSearch
+          title="Manufacturers"
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Type to search manufacturers..."
+          items={filteredManufacturers.map(m => m.name)}
+          selectedItem={selectedManufacturer?.name || ''}
+          onItemClick={(manufacturerName) => {
+            const manufacturer = filteredManufacturers.find(m => m.name === manufacturerName);
+            if (manufacturer) {
+              handleManufacturerClick(manufacturer);
+              setSidebarOpen(false);
+            }
+          }}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          hintText="💡 Click on a manufacturer to view details"
+          renderItem={(name, isSelected) => (
+            <span className={isSelected ? '' : 'italic'}>{name}</span>
+          )}
+        />
 
         <main className="flex-1 p-3 sm:p-6 w-full lg:w-auto">
           <div className="lg:hidden mb-4">

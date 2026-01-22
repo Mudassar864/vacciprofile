@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, CSSProperties } from 'react';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
 
 interface SidebarWithSearchProps {
@@ -18,7 +18,8 @@ interface SidebarWithSearchProps {
   emptyMessage?: string;
   sidebarClassName?: string;
   headerClassName?: string;
-  itemClassName?: (isSelected: boolean) => string;
+  itemClassName?: (isSelected: boolean, item?: string) => string;
+  itemStyle?: (isSelected: boolean, item?: string) => CSSProperties;
   hintText?: string;
 }
 
@@ -37,6 +38,7 @@ export function SidebarWithSearch({
   sidebarClassName = '',
   headerClassName = '',
   itemClassName,
+  itemStyle,
   hintText,
 }: SidebarWithSearchProps) {
   const defaultRenderItem = (item: string, isSelected: boolean) => {
@@ -55,21 +57,23 @@ export function SidebarWithSearch({
         ? 'bg-[#d17728] text-white font-semibold'
         : 'text-black'
     }`;
-  const getItemClassName = itemClassName || defaultItemClassName;
+  const getItemClassName = itemClassName 
+    ? (isSelected: boolean, item: string) => itemClassName(isSelected, item)
+    : defaultItemClassName;
 
   return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[130] lg:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-[60] w-80 border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-0 left-0 z-[140] w-80 border-r border-gray-200 h-screen lg:h-[calc(100vh-140px)] overflow-hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 ${sidebarClassName || 'bg-white'}`}
       >
@@ -111,7 +115,8 @@ export function SidebarWithSearch({
                     onItemClick(item);
                     onClose();
                   }}
-                  className={getItemClassName(isSelected)}
+                  className={getItemClassName(isSelected, item)}
+                  style={itemStyle ? itemStyle(isSelected, item) : undefined}
                 >
                   {render(item, isSelected)}
                 </button>
