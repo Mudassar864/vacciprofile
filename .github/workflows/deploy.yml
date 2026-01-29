@@ -30,8 +30,8 @@ jobs:
           # Install dependencies
           npm install
           
-          # Build with environment variable
-          NEXT_PUBLIC_API_URL=http://52.0.207.83 npm run build
+          # Build with environment variable (Vercel backend)
+          NEXT_PUBLIC_API_URL=https://vacciprofile-backend.vercel.app npm run build
           
           # Restart PM2
           pm2 restart vacciprofile-frontend-new
