@@ -4,15 +4,9 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Menu, X, Search, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { AlphabetNav } from '@/components/alphabet-nav';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ProductProfileComparison } from '@/components/vaccines/product-profile-comparison';
+import { ProductProfileDialog } from '@/components/vaccines/product-profile-dialog';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
-import type { ProductProfile, LicensingDate } from '@/lib/types';
+import type { ProductProfile, LicensingDate, Vaccine } from '@/lib/types';
 
 /** Raw vaccine from API – no restructuring. */
 export type RawVaccine = Record<string, unknown> & {
@@ -109,6 +103,33 @@ function manufacturerDisplay(v: RawVaccine): string {
   if (typeof m === 'string') return m.trim();
   if (Array.isArray(m)) return (m as string[]).map((s) => String(s).trim()).filter(Boolean).join(', ');
   return '';
+}
+
+function toVaccineForDialog(
+  v: (RawVaccine & { productProfiles?: ProductProfile[]; licensingDates?: LicensingDate[] }) | null
+): Vaccine | null {
+  if (!v) return null;
+  const p = pathogenDisplay(v);
+  const first =
+    typeof v.pathogenNames === 'string'
+      ? (v.pathogenNames as string).split(',')[0]?.trim()
+      : Array.isArray(v.pathogenNames)
+        ? (v.pathogenNames as string[])[0]?.trim()
+        : '';
+  const isComb = (v.vaccineType ?? '').toString().toLowerCase().includes('combination');
+  const link = (v.vaccineLink ?? v.link ?? '') as string;
+  return {
+    licensed_vaccine_id: (v.id ?? '') as string,
+    vaccine_brand_name: (v.name ?? '') as string,
+    pathogen_name: first || p || undefined,
+    single_or_combination: isComb ? 'Combination' : 'Single',
+    authority_names: [],
+    authority_links: [],
+    vaccine_link: link || undefined,
+    manufacturer: manufacturerDisplay(v) || undefined,
+    productProfiles: v.productProfiles,
+    licensingDates: (v as { licensingDates?: LicensingDate[] }).licensingDates,
+  };
 }
 
 function vaccinesForLicenser(
@@ -346,7 +367,18 @@ export function AuthoritiesClient({
                 className="w-full px-4 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                 aria-label="Search licensing authorities"
               />
-              <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+              {searchQuery.trim() ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              ) : (
+                <Search className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" size={20} />
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-2">💡 Click on an authority to view approved vaccines</p>
           </div>
@@ -657,42 +689,11 @@ export function AuthoritiesClient({
         </main>
       </div>
 
-      <Dialog open={!!selectedVaccine} onOpenChange={(open) => { if (!open) setSelectedVaccine(null); }}>
-        <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto p-0 mx-2 sm:mx-4">
-          {selectedVaccine && (
-            <>
-              <DialogHeader className="bg-gradient-to-r from-[#d17728] to-[#e6893a] px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 rounded-t-lg">
-                <DialogTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white break-words">
-                  {(selectedVaccine.name ?? '') as string}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
-                  <div>
-                    <span className="font-semibold text-gray-700">Type:</span>
-                    <span className="ml-2 text-gray-600 break-words">
-                      {(selectedVaccine.vaccineType ?? '').toString().toLowerCase().includes('combination') ? 'Combination' : 'Single'}
-                    </span>
-                  </div>
-                </div>
-                {loadingProductProfiles ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#d17728]" />
-                    <p className="mt-2 text-gray-600">Loading product profiles...</p>
-                  </div>
-                ) : selectedVaccine.productProfiles && selectedVaccine.productProfiles.length > 0 ? (
-                  <ProductProfileComparison
-                    profiles={selectedVaccine.productProfiles}
-                    licensingDates={(selectedVaccine as { licensingDates?: LicensingDate[] }).licensingDates ?? []}
-                  />
-                ) : (
-                  <div className="text-center py-8 text-gray-500">No product profile information available for this vaccine.</div>
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ProductProfileDialog
+        vaccine={toVaccineForDialog(selectedVaccine)}
+        onClose={() => setSelectedVaccine(null)}
+        loading={loadingProductProfiles}
+      />
     </div>
   );
 }
