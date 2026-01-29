@@ -11,6 +11,7 @@ import { VaccineComparisonTable } from '@/components/vaccines/vaccine-comparison
 import { Vaccine, ProductProfile } from '@/lib/types';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
 import { formatAuthorityName } from '@/lib/authority-formatting';
+import { getApiBaseUrl } from '@/lib/api-url';
 
 interface VaccineWithProfiles extends Vaccine {
   productProfiles?: ProductProfile[];
@@ -65,7 +66,7 @@ export function CompareClient({
     
     setLoadingProfiles(prev => ({ ...prev, [vaccineName]: true }));
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL|| 'http://localhost:5000';
+      const API_BASE = getApiBaseUrl();
       const response = await fetch(
         `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`,
         { cache: 'no-store' }

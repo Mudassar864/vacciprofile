@@ -7,6 +7,7 @@ import { AlphabetNav } from '@/components/alphabet-nav';
 import { ProductProfileDialog } from '@/components/vaccines/product-profile-dialog';
 import { formatPathogenName } from '@/lib/pathogen-formatting';
 import type { ProductProfile, LicensingDate, Vaccine } from '@/lib/types';
+import { getApiBaseUrl } from '@/lib/api-url';
 
 /** Raw vaccine from API – no restructuring. */
 export type RawVaccine = Record<string, unknown> & {
@@ -292,7 +293,7 @@ export function AuthoritiesClient({
   };
 
   const fetchProductProfiles = async (name: string) => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const API_BASE = getApiBaseUrl();
     const r = await fetch(`${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(name)}`, { cache: 'no-store' });
     if (!r.ok) return [];
     const j = await r.json();
@@ -300,7 +301,7 @@ export function AuthoritiesClient({
   };
 
   const fetchLicensingDates = async (name: string) => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const API_BASE = getApiBaseUrl();
     const r = await fetch(`${API_BASE}/api/licensing-dates?vaccineName=${encodeURIComponent(name)}`, { cache: 'no-store' });
     if (!r.ok) return [];
     const j = await r.json();

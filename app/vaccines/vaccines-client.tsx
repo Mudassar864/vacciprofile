@@ -10,6 +10,7 @@ import { ProductProfileComparison } from "@/components/vaccines/product-profile-
 import { Vaccine, PathogenData } from "@/lib/types";
 import { formatPathogenName } from "@/lib/pathogen-formatting";
 import { formatAuthorityName } from "@/lib/authority-formatting";
+import { getApiBaseUrl } from "@/lib/api-url";
 
 interface VaccinesClientProps {
   initialVaccines: Vaccine[];
@@ -72,7 +73,7 @@ export function VaccinesClient({
   const fetchProductProfiles = async (vaccineName: string) => {
     setLoadingProductProfiles(true);
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const API_BASE = getApiBaseUrl();
       const response = await fetch(
         `${API_BASE}/api/product-profiles?vaccineName=${encodeURIComponent(vaccineName)}`,
         { cache: 'no-store' }
@@ -90,7 +91,7 @@ export function VaccinesClient({
 
   const fetchLicensingDates = async (vaccineName: string) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const API_BASE = getApiBaseUrl();
       const response = await fetch(
         `${API_BASE}/api/licensing-dates?vaccineName=${encodeURIComponent(vaccineName)}`,
         { cache: 'no-store' }
