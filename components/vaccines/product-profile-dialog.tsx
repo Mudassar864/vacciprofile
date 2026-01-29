@@ -3,6 +3,7 @@
 import { Vaccine, ProductProfile, LicensingDate } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
 import { formatAuthorityName } from '@/lib/authority-formatting';
+import { formatPathogenName } from '@/lib/pathogen-formatting';
 import {
   Dialog,
   DialogContent,
@@ -57,8 +58,14 @@ export function ProductProfileDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
             <div>
               <span className="font-semibold text-gray-700">Pathogen:</span>
-              <span className="ml-2 text-gray-600 break-words">
-                {vaccine.pathogen_name || ''}
+              <span className={`ml-2 text-gray-600 break-words ${(() => {
+                const { className } = formatPathogenName(vaccine.pathogen_name || '');
+                return className || '';
+              })()}`}>
+                {(() => {
+                  const { displayName } = formatPathogenName(vaccine.pathogen_name || '');
+                  return displayName;
+                })()}
               </span>
             </div>
             <div>

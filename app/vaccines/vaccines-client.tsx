@@ -153,8 +153,14 @@ export function VaccinesClient({
               aria-label="Open sidebar to select pathogen"
             >
               <Menu size={20} />
-              <span className="font-medium text-gray-700">
-                {selectedPathogen || "👆 Tap to select a pathogen"}
+              <span className={`font-medium text-gray-700 ${selectedPathogen ? (() => {
+                const { className } = formatPathogenName(selectedPathogen);
+                return className || '';
+              })() : ''}`}>
+                {selectedPathogen ? (() => {
+                  const { displayName } = formatPathogenName(selectedPathogen);
+                  return displayName;
+                })() : "👆 Tap to select a pathogen"}
               </span>
             </button>
             {!selectedPathogen && (
@@ -371,8 +377,14 @@ export function VaccinesClient({
               {expandedSections.pathogenProfile && selectedPathogenData && (
                 <div className="px-3 sm:px-6 pb-4">
                   <div className="bg-white rounded shadow p-4 sm:p-6">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      {selectedPathogenData.name}
+                    <h3 className={`text-lg sm:text-xl font-semibold text-gray-800 mb-4 ${(() => {
+                      const { className } = formatPathogenName(selectedPathogenData.name || '');
+                      return className || '';
+                    })()}`}>
+                      {(() => {
+                        const { displayName } = formatPathogenName(selectedPathogenData.name || '');
+                        return displayName;
+                      })()}
                     </h3>
                     {selectedPathogenData.description && (
                       <p className="text-gray-700 mb-4 leading-relaxed text-sm sm:text-base">

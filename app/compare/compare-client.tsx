@@ -303,8 +303,14 @@ export function CompareClient({
               aria-label="Open sidebar"
             >
               <Menu size={20} className="text-gray-700" />
-              <span className="font-medium text-gray-700">
-                {currentPathogen || "Select Pathogen"}
+              <span className={`font-medium text-gray-700 ${currentPathogen ? (() => {
+                const { className } = formatPathogenName(currentPathogen);
+                return className || '';
+              })() : ''}`}>
+                {currentPathogen ? (() => {
+                  const { displayName } = formatPathogenName(currentPathogen);
+                  return displayName;
+                })() : "Select Pathogen"}
               </span>
             </button>
           </div>
@@ -691,7 +697,10 @@ export function CompareClient({
                     Selected: {selectedVaccines.length} vaccine{selectedVaccines.length !== 1 ? 's' : ''}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    Current pathogen: {currentPathogen || 'None'}
+                    Current pathogen: {currentPathogen ? (() => {
+                      const { displayName, className } = formatPathogenName(currentPathogen);
+                      return <span className={className || ''}>{displayName}</span>;
+                    })() : 'None'}
                   </p>
                   <p className="text-xs text-gray-400 mt-4">
                     Try selecting vaccines again or check if they match the current pathogen filter.

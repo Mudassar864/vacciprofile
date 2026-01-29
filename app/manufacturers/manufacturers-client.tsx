@@ -301,8 +301,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <Calendar className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">Founded</p>
-                              <p className="font-semibold">{selectedManufacturer.details.founded}</p>
+                              <p className="text-sm text-gray-600 font-bold">Founded</p>
+                              <p className="">{selectedManufacturer.details.founded}</p>
                             </div>
                           </div>
                         )}
@@ -310,8 +310,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <Building2 className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">Headquarters</p>
-                              <p className="font-semibold">{selectedManufacturer.details.headquarters}</p>
+                              <p className="text-sm text-gray-600 font-bold">Headquarters</p>
+                              <p className="">{selectedManufacturer.details.headquarters}</p>
                             </div>
                           </div>
                         )}
@@ -319,8 +319,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <Users className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">CEO</p>
-                              <p className="font-semibold">{selectedManufacturer.details.ceo}</p>
+                              <p className="text-sm text-gray-600 font-bold">CEO</p>
+                              <p className="">{selectedManufacturer.details.ceo}</p>
                             </div>
                           </div>
                         )}
@@ -328,8 +328,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <Users className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">Employees</p>
-                              <p className="font-semibold">{selectedManufacturer.details.numberOfEmployees}</p>
+                              <p className="text-sm text-gray-600 font-bold">Employees</p>
+                              <p className="">{selectedManufacturer.details.numberOfEmployees}</p>
                             </div>
                           </div>
                         )}
@@ -337,8 +337,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <DollarSign className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">Revenue</p>
-                              <p className="font-semibold">{selectedManufacturer.details.revenue}</p>
+                              <p className="text-sm text-gray-600 font-bold">Revenue</p>
+                              <p className="">{selectedManufacturer.details.revenue}</p>
                             </div>
                           </div>
                         )}
@@ -346,8 +346,8 @@ export function ManufacturersClient({
                           <div className="flex items-start gap-3">
                             <DollarSign className="text-orange-600 mt-1" size={20} />
                             <div>
-                              <p className="text-sm text-gray-600">Net Income</p>
-                              <p className="font-semibold">{selectedManufacturer.details.netIncome}</p>
+                              <p className="text-sm text-gray-600 font-bold">Net Income</p>
+                              <p className="">{selectedManufacturer.details.netIncome}</p>
                             </div>
                           </div>
                         )}
@@ -355,7 +355,7 @@ export function ManufacturersClient({
 
                       {selectedManufacturer.history && (
                         <div className="border-t pt-4">
-                          <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">History</h3>
+                          <h3 className=" text-gray-900 mb-2 text-sm sm:text-base font-bold">History</h3>
                           <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{selectedManufacturer.history}</p>
                         </div>
                       )}

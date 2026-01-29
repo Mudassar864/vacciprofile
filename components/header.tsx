@@ -5,11 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export function Header() {
-  const words = ['Vaccines.', 'Licensed Vaccines.', 'Vaccine Candidates.', 'Manufacturers.', 'Licensing Authorities.', 'Country NITAGs.'];
+  const words = [ 'Licensed Vaccines.', 'Vaccine Candidates.', 'Manufacturers.', 'Licensing Authorities.', 'Country NITAGs.'];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [typingSpeed, setTypingSpeed] = useState(200);
+  const [typingSpeed, setTypingSpeed] = useState(100);
 
   useEffect(() => {
     const currentWord = words[currentWordIndex];
@@ -40,7 +40,7 @@ export function Header() {
   }, [currentText, isDeleting, currentWordIndex]);
 
   return (
-    <header className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 relative z-[100]">
+    <header className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 relative z-20">
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 max-w-[1920px] mx-auto">
         {/* Logo - Left */}
         <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-start">
@@ -58,8 +58,8 @@ export function Header() {
         
         {/* Centered heading - Middle */}
         <div className="flex-1 flex justify-center items-center w-full sm:w-auto min-w-0">
-          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold text-[#91877d] tracking-tight text-center px-2 break-words sm:whitespace-nowrap">
-            All <span className="text-[#d17728] text-lg sm:text-xl md:text2xl lg:text-3xl xl:text-4xl 2xl:text-5xl ">{currentText}</span>
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-[#91877d] tracking-tight text-center px-2 break-words sm:whitespace-nowrap">
+            All <span className="text-[#d17728]  ">{currentText}</span>
             <span className="text-[#d17728] animate-pulse inline-block" style={{ transform: 'scaleX(0.5)', transformOrigin: 'center' }}>|</span> One Profile.
           </h1>
         </div>

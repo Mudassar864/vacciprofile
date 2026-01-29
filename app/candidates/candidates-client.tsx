@@ -158,8 +158,14 @@ export function CandidatesClient({
               aria-label="Open sidebar"
             >
               <Menu size={20} />
-              <span className="font-medium text-gray-700">
-                {selectedPathogen || "👆 Tap to select a pathogen"}
+              <span className={`font-medium text-gray-700 ${selectedPathogen ? (() => {
+                const { className } = formatPathogenName(selectedPathogen);
+                return className || '';
+              })() : ''}`}>
+                {selectedPathogen ? (() => {
+                  const { displayName } = formatPathogenName(selectedPathogen);
+                  return displayName;
+                })() : "👆 Tap to select a pathogen"}
               </span>
             </button>
             {!selectedPathogen && (
@@ -216,7 +222,7 @@ export function CandidatesClient({
                                     href={candidate.other}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-blue-500 hover:underline mt-1 block inline-flex items-center gap-1"
+                                    className="text-xs text-blue-500 hover:underline mt-1 inline-flex items-center gap-1"
                                     title="View clinical trials information (opens in new tab)"
                                   >
                                     <span>Clinical Trials</span>
